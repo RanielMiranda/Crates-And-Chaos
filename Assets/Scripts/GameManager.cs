@@ -60,7 +60,15 @@ public class GameManager : MonoBehaviour
             boxPositions.Add(box.transform.position);
         }
 
+        var elementalBoxPositions = new List<Vector3>();
+        var elementalBoxes = GetAllElementalBoxes();
+        foreach (var box in elementalBoxes)
+        {
+            elementalBoxPositions.Add(box.transform.position);
+        }
+
         state.boxPositions = boxPositions;
+        state.elementalBoxPositions = elementalBoxPositions;
 
         undoStack.Push(state);
         redoStack.Clear();
@@ -73,7 +81,8 @@ public class GameManager : MonoBehaviour
             GameState currentState = new GameState
             {
                 playerPosition = GameObject.FindWithTag("Player").transform.position,
-                boxPositions = new List<Vector3>()
+                boxPositions = new List<Vector3>(),
+                elementalBoxPositions = new List<Vector3>()
             };
 
             var boxes = GameObject.FindGameObjectsWithTag("Box");
@@ -82,6 +91,11 @@ public class GameManager : MonoBehaviour
                 currentState.boxPositions.Add(box.transform.position);
             }
 
+            var elementalBoxes = GetAllElementalBoxes();
+            foreach (var box in elementalBoxes)
+            {
+                currentState.elementalBoxPositions.Add(box.transform.position);
+            }
 
             redoStack.Push(currentState);
 
@@ -93,6 +107,10 @@ public class GameManager : MonoBehaviour
                 boxes[i].transform.position = lastState.boxPositions[i];
             }
 
+            for (int i = 0; i < elementalBoxes.Count; i++)
+            {
+                elementalBoxes[i].transform.position = lastState.elementalBoxPositions[i];
+            }
         }
     }
 
@@ -110,6 +128,12 @@ public class GameManager : MonoBehaviour
             {
                 boxes[i].transform.position = redoState.boxPositions[i];
             }
+
+            var elementalBoxes = GetAllElementalBoxes();
+            for (int i = 0; i < elementalBoxes.Count; i++)
+            {
+                elementalBoxes[i].transform.position = redoState.elementalBoxPositions[i];
+            }
         }
     }
 
@@ -126,11 +150,20 @@ public class GameManager : MonoBehaviour
         Debug.Log("Cheat is working");
     }
 
+    private List<GameObject> GetAllElementalBoxes()
+    {
+        var elementalBoxes = new List<GameObject>();
+        elementalBoxes.AddRange(GameObject.FindGameObjectsWithTag("Ember Box"));
+        elementalBoxes.AddRange(GameObject.FindGameObjectsWithTag("Volt Box"));
+        elementalBoxes.AddRange(GameObject.FindGameObjectsWithTag("Frost Box"));
+        elementalBoxes.AddRange(GameObject.FindGameObjectsWithTag("Magnet Box"));
+        return elementalBoxes;
+    }
+
     public struct GameState
     {
         public Vector3 playerPosition;
         public List<Vector3> boxPositions;
-
+        public List<Vector3> elementalBoxPositions;
     }
 }
-

@@ -33,8 +33,8 @@ public class PlayerController : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Z)) GameManager.Instance.Undo();
         if (Input.GetKeyDown(KeyCode.X)) GameManager.Instance.Redo();
-        if (Input.GetKeyDown(KeyCode.C)) GameManager.Instance.Reset();
-        if (Input.GetKeyDown(KeyCode.V)) GameManager.Instance.Cheat();
+        if (Input.GetKeyDown(KeyCode.R)) GameManager.Instance.Reset();
+        if (Input.GetKeyDown(KeyCode.C)) GameManager.Instance.Cheat();
     }
 
     private void GetMovementInput(ref Vector3 movement) 
@@ -62,6 +62,28 @@ public class PlayerController : MonoBehaviour
             if (box!=null && box.TryToPushBox(direction, moveSpeed)) 
             {
                 StartCoroutine(MoveToPosition(targetPosition));
+            }
+        }
+
+        //moving elemental boxes
+        else if (hit.collider.CompareTag("Ember Box") || hit.collider.CompareTag("Volt Box") || hit.collider.CompareTag("Frost Box") || hit.collider.CompareTag("Magnet Box")) 
+        {
+            var box = hit.collider.GetComponent<ElementalBoxController>();
+
+           
+            if (box!=null)
+            {
+                 //empty space
+                if (box.TryToPushBox(direction, moveSpeed) && !box.GetIsReacting())
+                {
+                    StartCoroutine(MoveToPosition(targetPosition));
+                }
+            
+                //reaction occured
+                else
+                {
+                    box.PerformReaction(box.CheckForReaction(hit), hit, targetPosition, direction, moveSpeed);                            
+                }                         
             }
         }
 
