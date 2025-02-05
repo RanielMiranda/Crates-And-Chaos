@@ -69,10 +69,11 @@ public class ElementalBoxController : MonoBehaviour
                 return ElementalReactions.ElementalIncrease;
         if (currentBoxTag == "Frost Box" && otherBoxTag == "Frost Box")
                 return ElementalReactions.ElementalIncrease;
-        }
+        
 
         return ElementalReactions.None;
     }
+    
 
     public void PerformReaction(ElementalReactions reaction, RaycastHit hit, Vector3 targetPosition, Vector3 direction, float moveSpeed)
     {
@@ -158,14 +159,14 @@ public class ElementalBoxController : MonoBehaviour
     }
 
     private void DestroyReaction(GameObject box)
-{
-    // Get the box's current position
-    Vector3 currentPosition = box.transform.position;
+    {
+        // Get the box's current position
+        Vector3 currentPosition = box.transform.position;
 
-    // Calculate a new position under the map
-    Vector3 newPosition = new Vector3(currentPosition.x, -10f, currentPosition.z);
+        // Calculate a new position under the map
+        Vector3 newPosition = new Vector3(currentPosition.x, -10f, currentPosition.z);
 
-    // Teleport the box to the new position
-    box.transform.position = newPosition;
+        // Teleport the box to the new position
+        box.transform.position = newPosition;
+    }
 }
-
