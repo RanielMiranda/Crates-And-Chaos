@@ -154,8 +154,14 @@ private void TryToMove(Vector3 direction)
 
         transform.position = target;
         GameManager.Instance.SaveState();
+        ResetMovePosition();
+    }
+
+    private void ResetMovePosition()
+    {
         isMoving = false;
         animator.SetBool("isMoving", false); // Reset animation for movement
         animator.SetBool("isPushing", false);
     }
+
 }

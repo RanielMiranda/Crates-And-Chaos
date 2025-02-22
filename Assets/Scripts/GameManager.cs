@@ -123,9 +123,9 @@ public class GameManager : MonoBehaviour
         {
             GameState redoState = redoStack.Pop();
             undoStack.Push(redoState);
-
-            GameObject.FindWithTag("Player").transform.position = redoState.playerPosition;
-            GameObject.FindWithTag("Player").transform.rotation = redoState.playerRotation;
+            var player = GameObject.FindWithTag("Player");
+            player.transform.position = redoState.playerPosition;
+            player.transform.rotation = redoState.playerRotation;
 
             var boxes = GameObject.FindGameObjectsWithTag("Box");
             for (int i = 0; i < boxes.Length; i++)
