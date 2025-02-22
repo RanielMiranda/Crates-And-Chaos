@@ -6,27 +6,48 @@ public class PlayerController : MonoBehaviour
 {
     public float moveSpeed = 5f;
     public LayerMask blockingLayer;
-    private bool isMoving = false;  
+    private bool isMoving = false;
+    private Vector3 lastDirection = Vector3.zero; // Store last movement direction
 
-    void Start ()
+    private Animator animator;
+
+    void Start()
     {
+        animator = GetComponentInChildren<Animator>();
         GameManager.Instance.SaveState();
     }
 
     void Update()
     {
-        if (isMoving) return; //don't do anything if the player is already moving
+        if (isMoving) return; // Don't do anything if the player is already moving
 
         GetNonMovementInput();
 
-        var movement = Vector3.zero;        
-
+        var movement = Vector3.zero;
         GetMovementInput(ref movement);
-        
-        if (movement != Vector3.zero) 
+
+        CheckForBoxInFront(); // Check for a box before moving
+
+        if (movement != Vector3.zero)
         {
             TryToMove(movement);
+        }   
+    }
+
+    private void CheckForBoxInFront()
+    {
+        if (lastDirection == Vector3.zero) return; // No movement yet
+
+        if (Physics.Raycast(transform.position, lastDirection, out RaycastHit hit, 1f, blockingLayer))
+        {
+            if (hit.collider.CompareTag("Box") || hit.collider.CompareTag("Ember Box") ||
+                hit.collider.CompareTag("Volt Box") || hit.collider.CompareTag("Frost Box") || hit.collider.CompareTag("Magnet Box"))
+            {
+                animator.SetBool("isBoxInFront", true);
+                return;
+            }
         }
+        animator.SetBool("isBoxInFront", false); // No box detected
     }
 
     private void GetNonMovementInput()
@@ -37,75 +58,104 @@ public class PlayerController : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.C)) GameManager.Instance.Cheat();
     }
 
-    private void GetMovementInput(ref Vector3 movement) 
+    private void GetMovementInput(ref Vector3 movement)
     {
-        if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow)) movement = Vector3.forward;  // Move forward
-        if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow)) movement = Vector3.back;     // Move backward
-        if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow)) movement = Vector3.left;     // Move left
-        if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow)) movement = Vector3.right;    // Move right        
+        if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow)) movement = Vector3.forward;
+        if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow)) movement = Vector3.back;
+        if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow)) movement = Vector3.left;
+        if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow)) movement = Vector3.right;
+
+        if (movement != Vector3.zero)
+        {
+            lastDirection = movement; // Store the last movement direction
+        }
     }
 
-    private void TryToMove(Vector3 direction) 
-    {   
-        var targetPosition = transform.position + direction;
+private void TryToMove(Vector3 direction)
+{
+    var targetPosition = transform.position + direction;
+    transform.rotation = Quaternion.LookRotation(direction) * Quaternion.Euler(0, -90, 0);
 
-        //moving to empty spaces
-        if(!Physics.Raycast(transform.position, direction, out RaycastHit hit, 1f, blockingLayer))
+    if (Physics.Raycast(transform.position, direction, out RaycastHit hit, 1f, blockingLayer))
+    {
+        // If the object hit is a wall or an unmovable object, do not proceed
+        if (!hit.collider.CompareTag("Box") && 
+            !hit.collider.CompareTag("Ember Box") &&
+            !hit.collider.CompareTag("Volt Box") &&
+            !hit.collider.CompareTag("Frost Box") &&
+            !hit.collider.CompareTag("Magnet Box") &&
+            !hit.collider.CompareTag("Goal")) 
         {
-            StartCoroutine(MoveToPosition(targetPosition));
+            return; // Block movement
         }
 
-        //moving normal boxes
-        else if (hit.collider.CompareTag("Box"))
+        // Moving normal boxes
+        if (hit.collider.CompareTag("Box"))
         {
             var box = hit.collider.GetComponent<NeutralBoxController>();
-            if (box!=null && box.TryToPushBox(direction, moveSpeed)) 
+            if (box != null && box.TryToPushBox(direction, moveSpeed))
             {
+                animator.SetBool("isPushing", true);
                 StartCoroutine(MoveToPosition(targetPosition));
             }
+            return;
         }
 
-        //moving elemental boxes
-        else if (hit.collider.CompareTag("Ember Box") || hit.collider.CompareTag("Volt Box") || hit.collider.CompareTag("Frost Box") || hit.collider.CompareTag("Magnet Box")) 
+        // Moving elemental boxes
+        if (hit.collider.CompareTag("Ember Box") || hit.collider.CompareTag("Volt Box") ||
+            hit.collider.CompareTag("Frost Box") || hit.collider.CompareTag("Magnet Box"))
         {
             var box = hit.collider.GetComponent<ElementalBoxController>();
 
-           
-            if (box!=null)
+            if (box != null)
             {
-                 //empty space
+                animator.SetBool("isPushing", true);
+
+                // Empty space
                 if (box.TryToPushBox(direction, moveSpeed) && !box.GetIsReacting())
                 {
                     StartCoroutine(MoveToPosition(targetPosition));
                 }
-            
-                //reaction occured
+                // Reaction occurred
                 else
                 {
-                    box.PerformReaction(box.CheckForReaction(hit), hit, targetPosition, direction, moveSpeed);                            
-                }                         
+                    box.PerformReaction(box.CheckForReaction(hit), hit, targetPosition, direction, moveSpeed);
+                }
             }
+            return;
         }
 
-        //moving to goal
-        else if (hit.collider.CompareTag("Goal") && GameManager.Instance.CheckWinCondition()) 
+        // Moving to goal
+        if (hit.collider.CompareTag("Goal") && GameManager.Instance.CheckWinCondition())
         {
             StartCoroutine(MoveToPosition(targetPosition));
+            return;
         }
     }
+    else
+    {
+        // No obstacles detected, move freely
+        animator.SetBool("isPushing", false);
+        StartCoroutine(MoveToPosition(targetPosition));
+    }
+}
+
 
     private IEnumerator MoveToPosition(Vector3 target)
     {
         isMoving = true;
+        animator.SetBool("isMoving", true); // Set animation for movement
 
-        while (Vector3.Distance(transform.position, target) >0.01f)
+        while (Vector3.Distance(transform.position, target) > 0.01f)
         {
             transform.position = Vector3.MoveTowards(transform.position, target, moveSpeed * Time.deltaTime);
             yield return null;
         }
 
         transform.position = target;
-        GameManager.Instance.SaveState();        
+        GameManager.Instance.SaveState();
         isMoving = false;
-    }   
+        animator.SetBool("isMoving", false); // Reset animation for movement
+        animator.SetBool("isPushing", false);
+    }
 }

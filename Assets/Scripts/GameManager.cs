@@ -52,6 +52,7 @@ public class GameManager : MonoBehaviour
     {
         GameState state = new GameState();
         state.playerPosition = GameObject.FindWithTag("Player").transform.position;
+        state.playerRotation = GameObject.FindWithTag("Player").transform.rotation;
 
         var boxPositions = new List<Vector3>();
         var boxes = GameObject.FindGameObjectsWithTag("Box");
@@ -81,6 +82,7 @@ public class GameManager : MonoBehaviour
             GameState currentState = new GameState
             {
                 playerPosition = GameObject.FindWithTag("Player").transform.position,
+                playerRotation = GameObject.FindWithTag("Player").transform.rotation,
                 boxPositions = new List<Vector3>(),
                 elementalBoxPositions = new List<Vector3>()
             };
@@ -101,6 +103,7 @@ public class GameManager : MonoBehaviour
 
             GameState lastState = undoStack.Pop();
             GameObject.FindWithTag("Player").transform.position = lastState.playerPosition;
+            GameObject.FindWithTag("Player").transform.rotation = lastState.playerRotation;
 
             for (int i = 0; i < boxes.Length; i++)
             {
@@ -122,6 +125,7 @@ public class GameManager : MonoBehaviour
             undoStack.Push(redoState);
 
             GameObject.FindWithTag("Player").transform.position = redoState.playerPosition;
+            GameObject.FindWithTag("Player").transform.rotation = redoState.playerRotation;
 
             var boxes = GameObject.FindGameObjectsWithTag("Box");
             for (int i = 0; i < boxes.Length; i++)
@@ -141,6 +145,8 @@ public class GameManager : MonoBehaviour
     {
         Debug.Log("Resetting");
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        totalGoalsCovered = 0;
+        UpdateGoalCount(0);
     }
 
     public void Cheat()
@@ -163,7 +169,9 @@ public class GameManager : MonoBehaviour
     public struct GameState
     {
         public Vector3 playerPosition;
+        public Quaternion playerRotation;
         public List<Vector3> boxPositions;
         public List<Vector3> elementalBoxPositions;
     }
 }
+
