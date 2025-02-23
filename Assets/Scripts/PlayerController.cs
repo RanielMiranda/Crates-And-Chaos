@@ -27,6 +27,7 @@ public class PlayerController : MonoBehaviour
         GetMovementInput(ref movement);
 
         //Animations
+        Debug.Log("newLine");
         CheckForBoxesAround();
 
         if (movement != Vector3.zero)
@@ -39,8 +40,7 @@ public class PlayerController : MonoBehaviour
     {
         if (lastDirection == Vector3.zero) return;
 
-        animator.SetBool("isBoxInFront", false);
-        animator.SetBool("isBoxBeside", false); // Reset beside detection
+        animator.SetBool("isBoxInFront", false); // Reset in front detection
 
         // Check in front
         if (Physics.Raycast(transform.position, lastDirection, out RaycastHit hitFront, 1f, blockingLayer))
@@ -52,32 +52,6 @@ public class PlayerController : MonoBehaviour
                 animator.SetBool("isBoxInFront", true);
             }
             Debug.Log("Box in front");
-        }
-
-        // Check left
-        Vector3 leftDir = new Vector3(-lastDirection.z, 0, lastDirection.x);
-        if (Physics.Raycast(transform.position, leftDir, out RaycastHit hitLeft, 1f, blockingLayer))
-        {
-            if (hitLeft.collider.CompareTag("Box") || hitLeft.collider.CompareTag("Ember Box") ||
-                hitLeft.collider.CompareTag("Volt Box") || hitLeft.collider.CompareTag("Frost Box") || 
-                hitLeft.collider.CompareTag("Magnet Box"))
-            {
-                animator.SetBool("isBoxBeside", true);
-            }
-            Debug.Log("Box on left");
-        }
-
-        // Check right
-        Vector3 rightDir = new Vector3(lastDirection.z, 0, -lastDirection.x);
-        if (Physics.Raycast(transform.position, rightDir, out RaycastHit hitRight, 1f, blockingLayer))
-        {
-            if (hitRight.collider.CompareTag("Box") || hitRight.collider.CompareTag("Ember Box") ||
-                hitRight.collider.CompareTag("Volt Box") || hitRight.collider.CompareTag("Frost Box") || 
-                hitRight.collider.CompareTag("Magnet Box"))
-            {
-                animator.SetBool("isBoxBeside", true);
-            }
-            Debug.Log("Box on right");
         }
     }
 
