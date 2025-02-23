@@ -12,6 +12,8 @@ TagManager:
   - Frost Box
   - Magnet Box
   - Metal Box
+  - Wall
+  - PlayerModel
   layers:
   - Default
   - TransparentFX

@@ -27,7 +27,6 @@ public class PlayerController : MonoBehaviour
         GetMovementInput(ref movement);
 
         //Animations
-        Debug.Log("newLine");
         CheckForBoxesAround();
 
         if (movement != Vector3.zero)
@@ -51,7 +50,6 @@ public class PlayerController : MonoBehaviour
             {
                 animator.SetBool("isBoxInFront", true);
             }
-            Debug.Log("Box in front");
         }
     }
 
