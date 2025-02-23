@@ -19,14 +19,15 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-        if (isMoving) return; // Don't do anything if the player is already moving
+        if (isMoving) return;
 
         GetNonMovementInput();
 
         var movement = Vector3.zero;
         GetMovementInput(ref movement);
 
-        CheckForBoxInFront(); // Check for a box before moving
+        //Animations
+        CheckForBoxesAround();
 
         if (movement != Vector3.zero)
         {
@@ -34,20 +35,58 @@ public class PlayerController : MonoBehaviour
         }   
     }
 
-    private void CheckForBoxInFront()
+    private void CheckForBoxesAround()
     {
-        if (lastDirection == Vector3.zero) return; // No movement yet
+        if (lastDirection == Vector3.zero) return;
 
-        if (Physics.Raycast(transform.position, lastDirection, out RaycastHit hit, 1f, blockingLayer))
+        animator.SetBool("isBoxInFront", false);
+        animator.SetBool("isBoxBeside", false); // Reset beside detection
+
+        // Check in front
+        if (Physics.Raycast(transform.position, lastDirection, out RaycastHit hitFront, 1f, blockingLayer))
         {
-            if (hit.collider.CompareTag("Box") || hit.collider.CompareTag("Ember Box") ||
-                hit.collider.CompareTag("Volt Box") || hit.collider.CompareTag("Frost Box") || hit.collider.CompareTag("Magnet Box"))
+            if (hitFront.collider.CompareTag("Box") || hitFront.collider.CompareTag("Ember Box") ||
+                hitFront.collider.CompareTag("Volt Box") || hitFront.collider.CompareTag("Frost Box") || 
+                hitFront.collider.CompareTag("Magnet Box"))
             {
                 animator.SetBool("isBoxInFront", true);
-                return;
             }
+            Debug.Log("Box in front");
         }
-        animator.SetBool("isBoxInFront", false); // No box detected
+
+        // Check left
+        Vector3 leftDir = new Vector3(-lastDirection.z, 0, lastDirection.x);
+        if (Physics.Raycast(transform.position, leftDir, out RaycastHit hitLeft, 1f, blockingLayer))
+        {
+            if (hitLeft.collider.CompareTag("Box") || hitLeft.collider.CompareTag("Ember Box") ||
+                hitLeft.collider.CompareTag("Volt Box") || hitLeft.collider.CompareTag("Frost Box") || 
+                hitLeft.collider.CompareTag("Magnet Box"))
+            {
+                animator.SetBool("isBoxBeside", true);
+            }
+            Debug.Log("Box on left");
+        }
+
+        // Check right
+        Vector3 rightDir = new Vector3(lastDirection.z, 0, -lastDirection.x);
+        if (Physics.Raycast(transform.position, rightDir, out RaycastHit hitRight, 1f, blockingLayer))
+        {
+            if (hitRight.collider.CompareTag("Box") || hitRight.collider.CompareTag("Ember Box") ||
+                hitRight.collider.CompareTag("Volt Box") || hitRight.collider.CompareTag("Frost Box") || 
+                hitRight.collider.CompareTag("Magnet Box"))
+            {
+                animator.SetBool("isBoxBeside", true);
+            }
+            Debug.Log("Box on right");
+        }
+    }
+
+    // Helper function to check if an object is a box
+    private bool IsBox(Collider collider)
+    {
+        return collider.CompareTag("Box") || collider.CompareTag("Ember Box") ||
+            collider.CompareTag("Volt Box") || collider.CompareTag("Frost Box") || 
+            collider.CompareTag("Magnet Box");
     }
 
     private void GetNonMovementInput()
@@ -71,75 +110,74 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-private void TryToMove(Vector3 direction)
-{
-    var targetPosition = transform.position + direction;
-    transform.rotation = Quaternion.LookRotation(direction) * Quaternion.Euler(0, -90, 0);
-
-    if (Physics.Raycast(transform.position, direction, out RaycastHit hit, 1f, blockingLayer))
+    private void TryToMove(Vector3 direction)
     {
-        // If the object hit is a wall or an unmovable object, do not proceed
-        if (!hit.collider.CompareTag("Box") && 
-            !hit.collider.CompareTag("Ember Box") &&
-            !hit.collider.CompareTag("Volt Box") &&
-            !hit.collider.CompareTag("Frost Box") &&
-            !hit.collider.CompareTag("Magnet Box") &&
-            !hit.collider.CompareTag("Goal")) 
-        {
-            return; // Block movement
-        }
+        var targetPosition = transform.position + direction;
+        transform.rotation = Quaternion.LookRotation(direction) * Quaternion.Euler(0, -90, 0);
 
-        // Moving normal boxes
-        if (hit.collider.CompareTag("Box"))
+        if (Physics.Raycast(transform.position, direction, out RaycastHit hit, 1f, blockingLayer))
         {
-            var box = hit.collider.GetComponent<NeutralBoxController>();
-            if (box != null && box.TryToPushBox(direction, moveSpeed))
+            // If the object hit is a wall or an unmovable object, do not proceed
+            if (!hit.collider.CompareTag("Box") && 
+                !hit.collider.CompareTag("Ember Box") &&
+                !hit.collider.CompareTag("Volt Box") &&
+                !hit.collider.CompareTag("Frost Box") &&
+                !hit.collider.CompareTag("Magnet Box") &&
+                !hit.collider.CompareTag("Goal")) 
             {
-                animator.SetBool("isPushing", true);
-                StartCoroutine(MoveToPosition(targetPosition));
+                return; // Block movement
             }
-            return;
-        }
 
-        // Moving elemental boxes
-        if (hit.collider.CompareTag("Ember Box") || hit.collider.CompareTag("Volt Box") ||
-            hit.collider.CompareTag("Frost Box") || hit.collider.CompareTag("Magnet Box"))
-        {
-            var box = hit.collider.GetComponent<ElementalBoxController>();
-
-            if (box != null)
+            // Moving normal boxes
+            if (hit.collider.CompareTag("Box"))
             {
-                animator.SetBool("isPushing", true);
-
-                // Empty space
-                if (box.TryToPushBox(direction, moveSpeed) && !box.GetIsReacting())
+                var box = hit.collider.GetComponent<NeutralBoxController>();
+                if (box != null && box.TryToPushBox(direction, moveSpeed))
                 {
+                    animator.SetBool("isPushing", true);
                     StartCoroutine(MoveToPosition(targetPosition));
                 }
-                // Reaction occurred
-                else
-                {
-                    box.PerformReaction(box.CheckForReaction(hit), hit, targetPosition, direction, moveSpeed);
-                }
+                return;
             }
-            return;
-        }
 
-        // Moving to goal
-        if (hit.collider.CompareTag("Goal") && GameManager.Instance.CheckWinCondition())
+            // Moving elemental boxes
+            if (hit.collider.CompareTag("Ember Box") || hit.collider.CompareTag("Volt Box") ||
+                hit.collider.CompareTag("Frost Box") || hit.collider.CompareTag("Magnet Box"))
+            {
+                var box = hit.collider.GetComponent<ElementalBoxController>();
+
+                if (box != null)
+                {
+                    animator.SetBool("isPushing", true);
+
+                    // Empty space
+                    if (box.TryToPushBox(direction, moveSpeed) && !box.GetIsReacting())
+                    {
+                        StartCoroutine(MoveToPosition(targetPosition));
+                    }
+                    // Reaction occurred
+                    else
+                    {
+                        box.PerformReaction(box.CheckForReaction(hit), hit, targetPosition, direction, moveSpeed);
+                    }
+                }
+                return;
+            }
+
+            // Moving to goal
+            if (hit.collider.CompareTag("Goal") && GameManager.Instance.CheckWinCondition())
+            {
+                StartCoroutine(MoveToPosition(targetPosition));
+                return;
+            }
+        }
+        else
         {
+            // No obstacles detected, move freely
+            animator.SetBool("isPushing", false);
             StartCoroutine(MoveToPosition(targetPosition));
-            return;
         }
     }
-    else
-    {
-        // No obstacles detected, move freely
-        animator.SetBool("isPushing", false);
-        StartCoroutine(MoveToPosition(targetPosition));
-    }
-}
-
 
     private IEnumerator MoveToPosition(Vector3 target)
     {
