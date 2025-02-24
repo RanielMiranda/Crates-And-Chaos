@@ -96,7 +96,7 @@ public class ElementalBoxController : MonoBehaviour
 
             case ElementalReactions.Melt:
                 Debug.Log("Melt has occurred");
-                // Destroy current box and collided box based on elemental level
+                // Destroy current box and collided box based on elemental level, if else statement and decrement elemental level
                 DestroyReaction(hit.collider.gameObject);
                 DestroyReaction(gameObject);                
                 break;
@@ -115,7 +115,7 @@ public class ElementalBoxController : MonoBehaviour
 
             case ElementalReactions.ElementalIncrease:
                 //Debug.Log("Elemental Increase has occurred");
-                // Destroy current box and collided box's elemental level is increased by current box level
+                // Destroy current box and GetOtherBox's  elemental level is increased by current box level
                 //create a new method to increase elemental level of collided box
                 break;
         }
@@ -132,6 +132,7 @@ public class ElementalBoxController : MonoBehaviour
             transform.position = Vector3.MoveTowards(transform.position, target, moveSpeed * Time.deltaTime);
             yield return null;
         }
+        AudioManager.MoveBox();
         transform.position = target;
         isMoving = false;
     }
