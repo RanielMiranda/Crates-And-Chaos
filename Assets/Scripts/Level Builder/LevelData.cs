@@ -12,12 +12,14 @@ public class LevelData
 [Serializable]
 public class LevelObject
 {
-    public string type;    // "Player", "Wall", "Box"
+    public string type;
     public float[] position; // [x, y, z]
+    public float[] scale; // [x, y, z]
 
-    public LevelObject(string type, float x, float y, float z)
+    public LevelObject(string type, float x, float y, float z, float scaleX, float scaleY, float scaleZ)
     {
         this.type = type;
         this.position = new float[] { x, y, z };
+        this.scale = new float[] { scaleX, scaleY, scaleZ };
     }
 }

@@ -5,9 +5,10 @@ public class SelectableObject : MonoBehaviour
     private bool isSelected = false;
     private Renderer objectRenderer;
     private Color originalColor;
-
+    private Color anotherColor;
     private bool isLevelEditor = false;
     private ObjectMover objectMover;
+    private LevelManager levelManager;    
 
     void Start()
     {
@@ -22,6 +23,7 @@ public class SelectableObject : MonoBehaviour
             isLevelEditor = true;
         }
 
+        levelManager = FindFirstObjectByType<LevelManager>();
         objectMover = FindFirstObjectByType<ObjectMover>(); // Get reference to ObjectMover
     }
 
@@ -29,6 +31,7 @@ public class SelectableObject : MonoBehaviour
     {   
         if (isLevelEditor && objectMover != null)
         {
+            isSelected = !isSelected;            
             if (isSelected)
             {
                 SelectObject();
@@ -43,14 +46,79 @@ public class SelectableObject : MonoBehaviour
     public void SelectObject()
     {
         isSelected = true;
-        objectRenderer.material.color = Color.green; // Highlight when selected
-        objectMover.SelectObject(gameObject); // Inform ObjectMover
+        if (CompareTag("Player"))
+        {
+            Transform playerModel = transform.Find("PlayerModel");
+
+            if (playerModel != null)
+            {
+                // Get all SkinnedMeshRenderers and MeshRenderers
+                SkinnedMeshRenderer[] skinnedRenderers = playerModel.GetComponentsInChildren<SkinnedMeshRenderer>();
+                MeshRenderer[] meshRenderers = playerModel.GetComponentsInChildren<MeshRenderer>();
+
+                if (skinnedRenderers.Length > 0)
+                {
+                    foreach (SkinnedMeshRenderer renderer in skinnedRenderers)
+                    {   
+                        originalColor = renderer.material.color;
+                        renderer.material.color = Color.green;
+                    }
+                }
+
+                if (meshRenderers.Length > 0)
+                {
+                    foreach (MeshRenderer renderer in meshRenderers)
+                    {
+                        anotherColor = renderer.material.color;
+                        renderer.material.color = Color.green; 
+                    }
+                }                
+            }
+        }
+        else
+        {
+            objectRenderer.material.color = Color.green; 
+        }
+        levelManager.UpdateSelectedObject(gameObject);
+        objectMover.SelectObject(gameObject);
     }
 
     public void DeselectObject()
     {
         isSelected = false;
-        objectRenderer.material.color = originalColor;
-        objectMover.DeselectObject(); // Deselect in ObjectMover        
+        if (CompareTag("Player"))
+        {
+            Transform playerModel = transform.Find("PlayerModel");
+
+            if (playerModel != null)
+            {
+
+                SkinnedMeshRenderer[] skinnedRenderers = playerModel.GetComponentsInChildren<SkinnedMeshRenderer>();
+                MeshRenderer[] meshRenderers = playerModel.GetComponentsInChildren<MeshRenderer>();
+
+                if (skinnedRenderers.Length > 0)
+                {
+                    foreach (SkinnedMeshRenderer renderer in skinnedRenderers)
+                    {
+                        renderer.material.color = originalColor;
+                    }
+                }
+
+                if (meshRenderers.Length > 0)
+                {
+                    foreach (MeshRenderer renderer in meshRenderers)
+                    {
+                        renderer.material.color = anotherColor;
+                    }
+                }
+            }
+        }
+        else
+        {        
+            objectRenderer.material.color = originalColor;
+        }
+        levelManager.UpdateSelectedObject(null);
+        objectMover.DeselectObject();      
     }
 }
+

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+using TMPro;
 
 public class LevelManager : MonoBehaviour
 {
@@ -8,6 +9,9 @@ public class LevelManager : MonoBehaviour
     public int gridX = 10, gridY = 10, gridZ = 5; // Default grid size
     
     private string path;
+    
+    public TMP_Text selectedObjectText; // UI text for selected object name
+    public TMP_Text objectInfoText; // UI text for object information
 
     void Start()
     {
@@ -20,6 +24,7 @@ public class LevelManager : MonoBehaviour
 
     public void SaveLevel()
     {
+        Debug.Log("Saving Level...");
         LevelData level = new LevelData
         {
             levelName = levelName,
@@ -27,15 +32,24 @@ public class LevelManager : MonoBehaviour
             objects = new List<LevelObject>()
         };
 
-        // Find all objects tagged with "Wall", "Box", etc.
-        foreach (GameObject obj in GameObject.FindGameObjectsWithTag("LevelObject"))
+        // Collect objects based on known types instead of a single tag
+        string[] objectTags = { "Wall", "Box", "Goal", "Pressure Plate", "Player", "Ember Box", "Volt Box", "Frost Box", "Magnet Box", "Metal Box" };
+
+        foreach (string tag in objectTags)
         {
-            level.objects.Add(new LevelObject(
-                obj.tag, 
-                obj.transform.position.x, 
-                obj.transform.position.y, 
-                obj.transform.position.z
-            ));
+            GameObject[] foundObjects = GameObject.FindGameObjectsWithTag(tag);
+            foreach (GameObject obj in foundObjects)
+            {
+                level.objects.Add(new LevelObject(
+                    obj.tag, 
+                    obj.transform.position.x, 
+                    obj.transform.position.y, 
+                    obj.transform.position.z,
+                    obj.transform.localScale.x,
+                    obj.transform.localScale.y,
+                    obj.transform.localScale.z
+                ));
+            }
         }
 
         // Convert to JSON and save
@@ -57,9 +71,13 @@ public class LevelManager : MonoBehaviour
         LevelData level = JsonUtility.FromJson<LevelData>(json);
         
         // Clear current scene objects
-        foreach (GameObject obj in GameObject.FindGameObjectsWithTag("LevelObject"))
+        string[] objectTags = { "Wall", "Box", "Goal", "Pressure Plate", "Player", "Ember Box", "Volt Box", "Frost Box", "Magnet Box", "Metal Box" };
+        foreach (string tag in objectTags)
         {
-            Destroy(obj);
+            foreach (GameObject obj in GameObject.FindGameObjectsWithTag(tag))
+            {
+                Destroy(obj);
+            }
         }
 
         // Rebuild the level
@@ -68,11 +86,30 @@ public class LevelManager : MonoBehaviour
             GameObject prefab = Resources.Load<GameObject>("Prefabs/" + obj.type);
             if (prefab != null)
             {
-                Instantiate(prefab, new Vector3(obj.position[0], obj.position[1], obj.position[2]), Quaternion.identity);
+                GameObject instance = Instantiate(prefab, new Vector3(obj.position[0], obj.position[1], obj.position[2]), Quaternion.identity);
+                instance.transform.localScale = new Vector3(obj.scale[0], obj.scale[1], obj.scale[2]);
             }
         }
 
         Debug.Log("Level Loaded: " + fileName);
     }
-}
 
+    public void UpdateSelectedObject(GameObject obj)
+    {
+        if (obj == null)
+        {
+            selectedObjectText.text = "No Object";
+            objectInfoText.text = $"Position X: None\nPosition Y: None\nPosition Z: None\n\n" +
+                                  $"Scale X: None\nScale Y: None\nScale Z: None";
+            return;
+        }
+
+        selectedObjectText.text = obj.name;
+
+        Vector3 pos = obj.transform.position;
+        Vector3 scale = obj.transform.localScale;
+
+        objectInfoText.text = $"Position X: {pos.x:F2}\nPosition Y: {pos.y:F2}\nPosition Z: {pos.z:F2}\n\n" +
+                              $"Scale X: {scale.x:F2}\nScale Y: {scale.y:F2}\nScale Z: {scale.z:F2}";
+    }
+}

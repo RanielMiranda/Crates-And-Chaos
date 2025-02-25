@@ -5,7 +5,12 @@ public class ObjectMover : MonoBehaviour
 {
     public float gridSize = 0.25f * 1; // Grid snapping size
     private GameObject selectedObject;
+    private LevelManager levelManager;
 
+    void Start()
+    {
+        levelManager = FindFirstObjectByType<LevelManager>();
+    }
     private void Update()
     {   
         if (selectedObject == null) return;
@@ -32,11 +37,15 @@ public class ObjectMover : MonoBehaviour
             if (Input.GetKeyDown(KeyCode.Delete)) DeleteObject();
 
             //change scale
-            if (Input.GetKeyDown(KeyCode.Q)) ScaleZ(1);
-            if (Input.GetKeyDown(KeyCode.E)) ScaleX(1);
+            if (selectedObject != null && selectedObject.tag == "Wall")
+            {
+                if (Input.GetKeyDown(KeyCode.Q)) ScaleZ(1);
+                if (Input.GetKeyDown(KeyCode.E)) ScaleX(1);
 
-            if (Input.GetKeyDown(KeyCode.Z)) ScaleZ(-1);            
-            if (Input.GetKeyDown(KeyCode.C)) ScaleX(-1);
+                if (Input.GetKeyDown(KeyCode.Z)) ScaleZ(-1);            
+                if (Input.GetKeyDown(KeyCode.C)) ScaleX(-1);
+            }
+        levelManager.UpdateSelectedObject(selectedObject);            
         }
     }
 
@@ -46,8 +55,6 @@ public class ObjectMover : MonoBehaviour
 
         var localScale = selectedObject.transform.localScale;
 
-        Debug.Log("Scaling X by " + value + ". Current value is " + localScale.x);
-
         if (localScale.x + value <= 0) return;
         selectedObject.transform.localScale = new Vector3(localScale.x + value, localScale.y, localScale.z);
     }
@@ -56,8 +63,6 @@ public class ObjectMover : MonoBehaviour
         if (selectedObject == null) return;
 
         var localScale = selectedObject.transform.localScale;
-
-        Debug.Log("Scaling Z by " + value + ". Current value is " + localScale.z);
 
         if (localScale.z + value <= 0) return;
         selectedObject.transform.localScale = new Vector3(localScale.x, localScale.y, localScale.z + value);
