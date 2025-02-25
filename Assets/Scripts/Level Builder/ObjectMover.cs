@@ -3,7 +3,7 @@ using UnityEngine.EventSystems;
 
 public class ObjectMover : MonoBehaviour
 {
-    public float gridSize = 0.25f * 50; // Grid snapping size
+    public float gridSize = 0.25f * 1; // Grid snapping size
     private GameObject selectedObject;
 
     private void Update()
@@ -22,13 +22,45 @@ public class ObjectMover : MonoBehaviour
 
         if (selectedObject != null)
         {
-            if (Input.GetKeyDown(KeyCode.W)) MoveSelected(Vector3.forward);
-            if (Input.GetKeyDown(KeyCode.S)) MoveSelected(Vector3.back);
-            if (Input.GetKeyDown(KeyCode.A)) MoveSelected(Vector3.left);
-            if (Input.GetKeyDown(KeyCode.D)) MoveSelected(Vector3.right);
-            if (Input.GetKeyDown(KeyCode.Q)) MoveSelected(Vector3.up);
-            if (Input.GetKeyDown(KeyCode.E)) MoveSelected(Vector3.down);
+            if (Input.GetKeyDown(KeyCode.W)) MoveSelected(Vector3.forward * 0.5f);
+            if (Input.GetKeyDown(KeyCode.S)) MoveSelected(Vector3.back * 0.5f);
+            if (Input.GetKeyDown(KeyCode.A)) MoveSelected(Vector3.left * 0.5f);
+            if (Input.GetKeyDown(KeyCode.D)) MoveSelected(Vector3.right * 0.5f);
+            if (Input.GetKeyDown(KeyCode.R)) MoveSelected(Vector3.up * 0.05f);
+            if (Input.GetKeyDown(KeyCode.F)) MoveSelected(Vector3.down * 0.05f);
+
+            if (Input.GetKeyDown(KeyCode.Delete)) DeleteObject();
+
+            //change scale
+            if (Input.GetKeyDown(KeyCode.Q)) ScaleZ(1);
+            if (Input.GetKeyDown(KeyCode.E)) ScaleX(1);
+
+            if (Input.GetKeyDown(KeyCode.Z)) ScaleZ(-1);            
+            if (Input.GetKeyDown(KeyCode.C)) ScaleX(-1);
         }
+    }
+
+    private void ScaleX(int value)
+    {
+        if (selectedObject == null) return;
+
+        var localScale = selectedObject.transform.localScale;
+
+        Debug.Log("Scaling X by " + value + ". Current value is " + localScale.x);
+
+        if (localScale.x + value <= 0) return;
+        selectedObject.transform.localScale = new Vector3(localScale.x + value, localScale.y, localScale.z);
+    }
+    private void ScaleZ(int value)
+    {
+        if (selectedObject == null) return;
+
+        var localScale = selectedObject.transform.localScale;
+
+        Debug.Log("Scaling Z by " + value + ". Current value is " + localScale.z);
+
+        if (localScale.z + value <= 0) return;
+        selectedObject.transform.localScale = new Vector3(localScale.x, localScale.y, localScale.z + value);
     }
 
     public void SelectObject(GameObject obj)
@@ -38,28 +70,35 @@ public class ObjectMover : MonoBehaviour
 
     public void DeselectObject()
     {
-        Debug.Log("Deselecting object: " + selectedObject.name);
         selectedObject = null;
-
     }
 
     void MoveSelected(Vector3 direction)
     {
-    if (selectedObject == null) return;
+        if (selectedObject == null) return;
 
-    Vector3 newPosition = selectedObject.transform.position + direction * gridSize;
+        Vector3 newPosition = selectedObject.transform.position + direction * gridSize;
 
-    // Ensure proper grid snapping
-    newPosition.x = Mathf.Round(newPosition.x / gridSize) * gridSize;
-    newPosition.y = Mathf.Round(newPosition.y / gridSize) * gridSize;
-    newPosition.z = Mathf.Round(newPosition.z / gridSize) * gridSize;
+        // Ensure proper grid snapping
+        newPosition.x = Mathf.Round(newPosition.x / 0.5f) * 0.5f;  
+        newPosition.y = Mathf.Round(newPosition.y / 0.05f) * 0.05f; 
+        newPosition.z = Mathf.Round(newPosition.z / 0.5f) * 0.5f;  
 
-    selectedObject.transform.position = newPosition;
+        selectedObject.transform.position = newPosition;
     }
 
     private bool IsPointerOverUI()
     {
         return EventSystem.current != null && EventSystem.current.IsPointerOverGameObject();
+    }
+
+    private void DeleteObject()
+    {
+        if (selectedObject != null)
+        {
+            Destroy(selectedObject);
+            DeselectObject();
+        }
     }
 }
 

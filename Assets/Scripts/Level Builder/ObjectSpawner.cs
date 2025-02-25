@@ -15,33 +15,26 @@ public class ObjectSpawner : MonoBehaviour
         float y;
         if (prefab != null)
         {
-            switch (prefab.name)
+            if (prefab.name == "Player")
             {
-                case "Player":
-                    y = .25f;
-                    break;
-                case "Wall":
-                case "Goal":
-                    y = .5f;
-                    break;                
-                case "Pressure Plate":
-                    y = 0.05f;
-                    break;
-                default:
-                    y = spawnPoint.position.y;
-                    break;
+                y = .25f;
             }
-        }
-        else
-        {
-            y = spawnPoint.position.y;
-        }
-        spawnPoint.position = new Vector3(spawnPoint.position.x, y, spawnPoint.position.z);
+            else if (prefab.name == "Wall" || prefab.name == "Goal")
+            {
+                y = .5f;
+            }
+            else if (prefab.name == "Pressure Plate")
+            {
+                y = 0.05f;
+            }
+            else
+            {
+                y = 0.5f;
+            }
 
-
-        if (prefab != null)
-        {
-            GameObject instance = Instantiate(prefab, spawnPoint.position, Quaternion.identity);
+            spawnPoint.position = new Vector3(spawnPoint.position.x, y, spawnPoint.position.z);  
+            GameObject instance = Instantiate(prefab, spawnPoint.position, Quaternion.identity);  
+                                            
         }
         else
         {

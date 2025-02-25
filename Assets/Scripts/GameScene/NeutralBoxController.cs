@@ -10,6 +10,12 @@ public class NeutralBoxController : MonoBehaviour
 
     private void Start() {
         boxMaterial = GetComponent<Renderer>().material;
+
+        //Level Editor
+        if (GameObject.FindFirstObjectByType<LevelManager>() != null)
+        {
+            Destroy(this);
+        }              
     }
 
     public bool TryToPushBox(Vector3 direction, float moveSpeed) 

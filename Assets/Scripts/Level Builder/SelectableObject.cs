@@ -29,18 +29,28 @@ public class SelectableObject : MonoBehaviour
     {   
         if (isLevelEditor && objectMover != null)
         {
-            isSelected = !isSelected;
-
             if (isSelected)
             {
-                objectRenderer.material.color = Color.green; // Highlight when selected
-                objectMover.SelectObject(gameObject); // Inform ObjectMover
+                SelectObject();
             }
             else
             {
-                objectRenderer.material.color = originalColor;
-                objectMover.DeselectObject(); // Deselect in ObjectMover
+                DeselectObject();
             }
         }
+    }
+
+    public void SelectObject()
+    {
+        isSelected = true;
+        objectRenderer.material.color = Color.green; // Highlight when selected
+        objectMover.SelectObject(gameObject); // Inform ObjectMover
+    }
+
+    public void DeselectObject()
+    {
+        isSelected = false;
+        objectRenderer.material.color = originalColor;
+        objectMover.DeselectObject(); // Deselect in ObjectMover        
     }
 }
