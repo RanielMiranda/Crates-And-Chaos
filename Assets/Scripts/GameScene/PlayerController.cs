@@ -14,7 +14,16 @@ public class PlayerController : MonoBehaviour
     void Start()
     {
         animator = GetComponentInChildren<Animator>();
+        if (GameManager.Instance != null) {
         GameManager.Instance.SaveState();
+        }
+
+        //Level Editor
+        if (GameObject.FindFirstObjectByType<LevelManager>() != null)
+        {
+            Destroy(this);
+        }        
+        
     }
 
     void Update()

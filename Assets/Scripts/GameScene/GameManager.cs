@@ -37,7 +37,6 @@ public class GameManager : MonoBehaviour
     {
         totalGoalsCovered += value;
         var goals = GameObject.FindGameObjectsWithTag("Goal");
-        Debug.Log("Total Goals Covered: " + totalGoalsCovered + " out of " + pressurePlates.Length);
         
         bool allGoalsCovered = totalGoalsCovered == pressurePlates.Length;
 

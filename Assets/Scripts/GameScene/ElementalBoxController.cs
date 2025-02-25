@@ -29,6 +29,7 @@ public class ElementalBoxController : MonoBehaviour
 
         if (!Physics.Raycast(transform.position, direction, out RaycastHit hit, 1f, blockingLayer))
         {
+            AudioManager.MoveBox();
             StartCoroutine(MoveToPosition(targetPosition, moveSpeed));
             return true;
         }  
@@ -45,7 +46,6 @@ public class ElementalBoxController : MonoBehaviour
     public bool GetIsReacting() { return isReacting; }
     public ElementalReactions CheckForReaction(RaycastHit hit)
     {
-
         string currentBoxTag = gameObject.tag;
         string otherBoxTag = hit.collider.tag;
 
@@ -74,10 +74,8 @@ public class ElementalBoxController : MonoBehaviour
         return ElementalReactions.None;
     }
     
-
     public void PerformReaction(ElementalReactions reaction, RaycastHit hit, Vector3 targetPosition, Vector3 direction, float moveSpeed)
     {
-
         switch (reaction)
         {
             case ElementalReactions.Overload:
@@ -126,16 +124,17 @@ public class ElementalBoxController : MonoBehaviour
     private IEnumerator MoveToPosition(Vector3 target, float moveSpeed)
     {
         isMoving = true;
+        AudioManager.MoveBox();
 
         while (Vector3.Distance(transform.position, target) >0.01f)
         {
             transform.position = Vector3.MoveTowards(transform.position, target, moveSpeed * Time.deltaTime);
             yield return null;
         }
-        AudioManager.MoveBox();
         transform.position = target;
         isMoving = false;
     }
+
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Pressure Plate"))
