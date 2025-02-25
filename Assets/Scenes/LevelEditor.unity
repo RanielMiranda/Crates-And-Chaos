@@ -312,7 +312,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Selected Object
+  m_text: No Object
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2100000, guid: e73a58f6e2794ae7b1b7e50b7fb811b0, type: 2}
@@ -1574,7 +1574,7 @@ MonoBehaviour:
           m_FloatArgument: 0
           m_StringArgument: 
           m_BoolArgument: 0
-        m_CallState: 0
+        m_CallState: 2
 --- !u!114 &1084072335
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2681,10 +2681,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3c10ce9737a6f444b9c0939adf1ce3e5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  levelName: MyNewLevel
+  levelName: Test Level
   gridX: 10
   gridY: 10
   gridZ: 5
+  selectedObjectText: {fileID: 151895946}
+  objectInfoText: {fileID: 514973473}
 --- !u!4 &1920987679
 Transform:
   m_ObjectHideFlags: 0

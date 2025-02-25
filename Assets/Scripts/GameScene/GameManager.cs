@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using System.IO;
 
 public class GameManager : MonoBehaviour
 {
@@ -18,6 +19,7 @@ public class GameManager : MonoBehaviour
 
     private int totalGoalsCovered = 0;
     private GameObject[] pressurePlates;
+    private string path;
 
     private void Awake()
     {
@@ -31,6 +33,7 @@ public class GameManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
+        path = Application.persistentDataPath + "/Levels/";
     }
 
     public void UpdateGoalCount(int value)
@@ -147,7 +150,7 @@ public class GameManager : MonoBehaviour
     public void Reset()
     {
         Debug.Log("Resetting");
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        LoadLevel("Test Level");
         totalGoalsCovered = 0;
         UpdateGoalCount(0);
     }
@@ -175,6 +178,44 @@ public class GameManager : MonoBehaviour
         public Quaternion playerRotation;
         public List<Vector3> boxPositions;
         public List<Vector3> elementalBoxPositions;
+    }
+
+    public void LoadLevel(string fileName)
+    {
+        string filePath = path + fileName + ".json";
+        if (!File.Exists(filePath))
+        {
+            Debug.LogError(Application.persistentDataPath + "/Levels/");
+            Debug.LogError("File not found: " + filePath);
+            return;
+        }
+
+        string json = File.ReadAllText(filePath);
+        LevelData level = JsonUtility.FromJson<LevelData>(json);
+        
+        // Clear current scene objects
+        string[] objectTags = { "Wall", "Box", "Goal", "Pressure Plate", "Player", "Ember Box", "Volt Box", "Frost Box", "Magnet Box", "Metal Box" };
+        foreach (string tag in objectTags)
+        {
+            foreach (GameObject obj in GameObject.FindGameObjectsWithTag(tag))
+            {
+                Destroy(obj);
+            }
+        }
+
+        // Rebuild the level
+        foreach (LevelObject obj in level.objects)
+        {
+            GameObject prefab = Resources.Load<GameObject>("Prefabs/" + obj.type);
+            if (prefab != null)
+            {
+                GameObject instance = Instantiate(prefab, new Vector3(obj.position[0], obj.position[1], obj.position[2]), Quaternion.identity);
+                instance.transform.localScale = new Vector3(obj.scale[0], obj.scale[1], obj.scale[2]);
+            }
+        }
+        pressurePlates = GameObject.FindGameObjectsWithTag("Pressure Plate");
+
+        Debug.Log("Level Loaded: " + fileName);
     }
 }
 

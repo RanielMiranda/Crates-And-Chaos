@@ -33,7 +33,7 @@ public class LevelManager : MonoBehaviour
         };
 
         // Collect objects based on known types instead of a single tag
-        string[] objectTags = { "Wall", "Box", "Goal", "Pressure Plate", "Player", "Ember Box", "Volt Box", "Frost Box", "Magnet Box", "Metal Box" };
+        string[] objectTags = { "Wall", "Box", "Goal", "Pressure Plate", "Player", "Ember Box", "Volt Box", "Frost Box", "Magnet Box", "Metal Box"};
 
         foreach (string tag in objectTags)
         {
