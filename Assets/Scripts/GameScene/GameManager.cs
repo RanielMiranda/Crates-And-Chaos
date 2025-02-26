@@ -150,9 +150,18 @@ public class GameManager : MonoBehaviour
     public void Reset()
     {
         Debug.Log("Resetting");
+        StartCoroutine(ResetAfterLoad());
+    }
+
+    private IEnumerator ResetAfterLoad()
+    {
         LoadLevel("Test Level");
+
+        // Wait for the level to fully load
+        yield return new WaitForSeconds(0.5f); 
+
         totalGoalsCovered = 0;
-        UpdateGoalCount(0);
+        UpdateGoalCount(0); 
     }
 
     public void Cheat()

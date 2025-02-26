@@ -31,23 +31,33 @@ public class ElementalBoxController : MonoBehaviour
     {   
         if (isMoving) return false;
 
-        var targetPosition = transform.position + direction;
-        
-        if (!Physics.Raycast(transform.position, direction, out RaycastHit hit, 1f, blockingLayer))
+        Vector3 targetPosition = transform.position + direction;
+
+        // No collision
+        if (!Physics.Raycast(transform.position, direction, out RaycastHit hit, direction.magnitude, blockingLayer))
         {
-            AudioManager.MoveBox();
-            Debug.Log("Current Position: " +transform.position +" Target Position: " +targetPosition);            
+            AudioManager.MoveBox();       
             StartCoroutine(MoveToPosition(targetPosition, moveSpeed));
             return true;
-        }  
+        }
 
+        // Collision case
+        Vector3 adjustedPosition = hit.point - (direction.normalized * 0.5f); // Stop before the hit
+        adjustedPosition = new Vector3(
+            Mathf.Round(adjustedPosition.x),
+            transform.position.y,
+            Mathf.Round(adjustedPosition.z)
+        );
+        
+        StartCoroutine(MoveToPosition(adjustedPosition, moveSpeed));
+        
         ElementalReactions reactions = CheckForReaction(hit);
-        if(reactions != ElementalReactions.None) {
+        if (reactions != ElementalReactions.None) 
+        {
             PerformReaction(reactions, hit, targetPosition, direction, moveSpeed);
             isReacting = true;
-            return true;
         }
-        return false;
+        return true;
     }
 
     public bool GetIsReacting() { return isReacting; }
@@ -130,7 +140,6 @@ public class ElementalBoxController : MonoBehaviour
     private IEnumerator MoveToPosition(Vector3 target, float moveSpeed)
     {
         isMoving = true;
-        AudioManager.MoveBox();
 
         while (Vector3.Distance(transform.position, target) >0.01f)
         {

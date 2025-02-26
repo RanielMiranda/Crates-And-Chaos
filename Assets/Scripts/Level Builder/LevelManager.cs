@@ -33,9 +33,9 @@ public class LevelManager : MonoBehaviour
         };
 
         // Check if there is a player
-        if (GameObject.FindGameObjectsWithTag("Player").Length == 0)
+        if (GameObject.FindGameObjectsWithTag("Player").Length == 0 || GameObject.FindGameObjectsWithTag("Goal").Length == 0)
         {
-            Debug.LogError("No player in the scene, level not saved.");
+            Debug.LogError("No player or goal in the scene, level not saved.");
             return;
         }
 

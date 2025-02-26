@@ -22,6 +22,17 @@ public class ObjectSpawner : MonoBehaviour
                 return;
             }
         }
+        // Check if the object is a Goal
+        else if (prefab != null && prefab.name == "Goal")
+        {
+            // Check the amount of goals
+            int goalCount = GameObject.FindGameObjectsWithTag("Goal").Length;
+            if (goalCount >= 1)
+            {
+                Debug.Log("You already have a goal in the scene.");
+                return;
+            }
+        }
 
         // Set the y position based on the prefab
         float y;
