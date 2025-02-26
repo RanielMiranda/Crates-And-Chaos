@@ -28,20 +28,22 @@ public class SelectableObject : MonoBehaviour
     }
 
     void OnMouseDown()
-    {   
+    {
         if (isLevelEditor && objectMover != null)
         {
-            isSelected = !isSelected;            
-            if (isSelected)
+            if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
             {
-                SelectObject();
+                if (!isSelected) SelectObject();
+                else DeselectObject();
             }
             else
             {
-                DeselectObject();
+                objectMover.ClearSelection(); // Deselect everything first
+                SelectObject();
             }
         }
     }
+
 
     public void SelectObject()
     {
@@ -79,8 +81,11 @@ public class SelectableObject : MonoBehaviour
         {
             objectRenderer.material.color = Color.green; 
         }
-        levelManager.UpdateSelectedObject(gameObject);
-        objectMover.SelectObject(gameObject);
+        if (!objectMover.ObjArray.Contains(gameObject))
+        {
+            objectMover.ObjArray.Add(gameObject);
+        }
+    levelManager.UpdateSelectedObject(gameObject);
     }
 
     public void DeselectObject()
@@ -117,8 +122,12 @@ public class SelectableObject : MonoBehaviour
         {        
             objectRenderer.material.color = originalColor;
         }
-        levelManager.UpdateSelectedObject(null);
-        objectMover.DeselectObject();      
+        objectMover.ObjArray.Remove(gameObject);
+
+        if (objectMover.ObjArray.Count == 0)
+        {
+            levelManager.UpdateSelectedObject(null);
+        }
     }
 }
 

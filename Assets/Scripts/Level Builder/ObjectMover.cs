@@ -1,95 +1,100 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
+using System.Collections.Generic;
 
 public class ObjectMover : MonoBehaviour
 {
     public float gridSize = 0.25f * 1; // Grid snapping size
-    private GameObject selectedObject;
+    public List<GameObject> ObjArray = new List<GameObject>();
     private LevelManager levelManager;
 
     void Start()
     {
         levelManager = FindFirstObjectByType<LevelManager>();
     }
-    private void Update()
-    {   
-        if (selectedObject == null) return;
-        if (Input.GetMouseButtonDown(0)) // Left-click to select
+    void Update()
+    {
+        if (ObjArray.Count == 1)
         {
-            if (IsPointerOverUI()) return;
-
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            if (Physics.Raycast(ray, out RaycastHit hit))
-            {
-                SelectObject(hit.collider.gameObject);
-            }
+            levelManager.UpdateSelectedObject(ObjArray[0]); // Display info for the only selected object
+        }
+        else if (ObjArray.Count == 0)
+        {
+            levelManager.UpdateSelectedObject(null); // No object selected
         }
 
-        if (selectedObject != null)
+        if (ObjArray.Count > 0)
         {
-            if (Input.GetKeyDown(KeyCode.W)) MoveSelected(Vector3.forward * 0.5f);
-            if (Input.GetKeyDown(KeyCode.S)) MoveSelected(Vector3.back * 0.5f);
-            if (Input.GetKeyDown(KeyCode.A)) MoveSelected(Vector3.left * 0.5f);
-            if (Input.GetKeyDown(KeyCode.D)) MoveSelected(Vector3.right * 0.5f);
+            
+            if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow)) MoveSelected(Vector3.forward * 0.5f);
+            if (Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.DownArrow)) MoveSelected(Vector3.back * 0.5f);
+            if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow)) MoveSelected(Vector3.left * 0.5f);
+            if (Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow)) MoveSelected(Vector3.right * 0.5f);
             if (Input.GetKeyDown(KeyCode.R)) MoveSelected(Vector3.up * 0.05f);
             if (Input.GetKeyDown(KeyCode.F)) MoveSelected(Vector3.down * 0.05f);
 
-            if (Input.GetKeyDown(KeyCode.Delete)) DeleteObject();
+            if (Input.GetKeyDown(KeyCode.Q)) ScaleX(1);
+            if (Input.GetKeyDown(KeyCode.E)) ScaleZ(1);
 
-            //change scale
-            if (selectedObject != null && selectedObject.tag == "Wall")
-            {
-                if (Input.GetKeyDown(KeyCode.Q)) ScaleZ(1);
-                if (Input.GetKeyDown(KeyCode.E)) ScaleX(1);
+            if (Input.GetKeyDown(KeyCode.Z)) ScaleX(-1);
+            if (Input.GetKeyDown(KeyCode.C)) ScaleZ(-1);
+            
 
-                if (Input.GetKeyDown(KeyCode.Z)) ScaleZ(-1);            
-                if (Input.GetKeyDown(KeyCode.C)) ScaleX(-1);
-            }
-        levelManager.UpdateSelectedObject(selectedObject);            
+            if (Input.GetKeyDown(KeyCode.Delete)) DeleteSelectedObjects();
         }
     }
 
     private void ScaleX(int value)
     {
-        if (selectedObject == null) return;
+        if (ObjArray.Count == 0) return;
 
-        var localScale = selectedObject.transform.localScale;
+        for (int i = ObjArray.Count - 1; i >= 0; i--)
+        {
+            GameObject obj = ObjArray[i];
+            var localScale = obj.transform.localScale;
 
-        if (localScale.x + value <= 0) return;
-        selectedObject.transform.localScale = new Vector3(localScale.x + value, localScale.y, localScale.z);
+            if (localScale.x + value <= 0) continue;
+            obj.transform.localScale = new Vector3(localScale.x + value, localScale.y, localScale.z);
+        }
     }
     private void ScaleZ(int value)
     {
-        if (selectedObject == null) return;
+        if (ObjArray.Count == 0) return;
 
-        var localScale = selectedObject.transform.localScale;
+        for (int i = ObjArray.Count - 1; i >= 0; i--)
+        {
+            GameObject obj = ObjArray[i];
+            var localScale = obj.transform.localScale;
 
-        if (localScale.z + value <= 0) return;
-        selectedObject.transform.localScale = new Vector3(localScale.x, localScale.y, localScale.z + value);
+            if (localScale.z + value <= 0) continue;
+            obj.transform.localScale = new Vector3(localScale.x, localScale.y, localScale.z + value);
+        }
     }
 
     public void SelectObject(GameObject obj)
     {
-        selectedObject = obj;
+        ObjArray.Add(obj);
     }
 
-    public void DeselectObject()
+    public void DeselectObject(GameObject obj)
     {
-        selectedObject = null;
+        ObjArray.Remove(obj);
     }
 
     void MoveSelected(Vector3 direction)
     {
-        if (selectedObject == null) return;
+        if (ObjArray.Count == 0) return;
 
-        Vector3 newPosition = selectedObject.transform.position + direction * gridSize;
+        for (int i = ObjArray.Count - 1; i >= 0; i--)
+        {
+            GameObject obj = ObjArray[i];
+            Vector3 newPosition = obj.transform.position + direction * gridSize;
+            newPosition.x = Mathf.Round(newPosition.x / 0.5f) * 0.5f;
+            newPosition.y = Mathf.Round(newPosition.y / 0.05f) * 0.05f;
+            newPosition.z = Mathf.Round(newPosition.z / 0.5f) * 0.5f;
 
-        // Ensure proper grid snapping
-        newPosition.x = Mathf.Round(newPosition.x / 0.5f) * 0.5f;  
-        newPosition.y = Mathf.Round(newPosition.y / 0.05f) * 0.05f; 
-        newPosition.z = Mathf.Round(newPosition.z / 0.5f) * 0.5f;  
-
-        selectedObject.transform.position = newPosition;
+            obj.transform.position = newPosition;
+        }
     }
 
     private bool IsPointerOverUI()
@@ -97,13 +102,24 @@ public class ObjectMover : MonoBehaviour
         return EventSystem.current != null && EventSystem.current.IsPointerOverGameObject();
     }
 
-    private void DeleteObject()
+    private void DeleteSelectedObjects()
     {
-        if (selectedObject != null)
+        for (int i = ObjArray.Count - 1; i >= 0; i--)
         {
-            Destroy(selectedObject);
-            DeselectObject();
+            GameObject obj = ObjArray[i];
+            Destroy(obj);
         }
+        ObjArray.Clear();
+    }
+
+    public void ClearSelection()
+    {
+        for (int i = ObjArray.Count - 1; i >= 0; i--)
+        {
+            GameObject obj = ObjArray[i];
+            obj.GetComponent<SelectableObject>().DeselectObject();
+        }
+        ObjArray.Clear();
     }
 }
 

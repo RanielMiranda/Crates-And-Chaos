@@ -32,6 +32,13 @@ public class LevelManager : MonoBehaviour
             objects = new List<LevelObject>()
         };
 
+        // Check if there is a player
+        if (GameObject.FindGameObjectsWithTag("Player").Length == 0)
+        {
+            Debug.LogError("No player in the scene, level not saved.");
+            return;
+        }
+
         // Collect objects based on known types instead of a single tag
         string[] objectTags = { "Wall", "Box", "Goal", "Pressure Plate", "Player", "Ember Box", "Volt Box", "Frost Box", "Magnet Box", "Metal Box"};
 

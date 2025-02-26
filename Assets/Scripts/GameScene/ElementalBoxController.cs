@@ -32,10 +32,11 @@ public class ElementalBoxController : MonoBehaviour
         if (isMoving) return false;
 
         var targetPosition = transform.position + direction;
-
+        
         if (!Physics.Raycast(transform.position, direction, out RaycastHit hit, 1f, blockingLayer))
         {
             AudioManager.MoveBox();
+            Debug.Log("Current Position: " +transform.position +" Target Position: " +targetPosition);            
             StartCoroutine(MoveToPosition(targetPosition, moveSpeed));
             return true;
         }  
@@ -85,7 +86,6 @@ public class ElementalBoxController : MonoBehaviour
         switch (reaction)
         {
             case ElementalReactions.Overload:
-                Debug.Log("Overload Occured");
                 var otherBox = GetOtherBox(hit);                
                 /*
                 replace 2f with the formula
