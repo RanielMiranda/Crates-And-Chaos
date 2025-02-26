@@ -60,6 +60,27 @@ public class ElementalBoxController : MonoBehaviour
         return true;
     }
 
+    public Vector3 GetFuturePosition(Vector3 direction)
+{
+    if (isMoving) return transform.position;
+
+    Vector3 targetPosition = transform.position + direction;
+
+    if (!Physics.Raycast(transform.position, direction, out RaycastHit hit, direction.magnitude, blockingLayer))
+    {
+        return targetPosition;
+    }
+
+    Vector3 adjustedPosition = hit.point - (direction.normalized * 0.5f);
+    adjustedPosition = new Vector3(
+        Mathf.Round(adjustedPosition.x),
+        transform.position.y,
+        Mathf.Round(adjustedPosition.z)
+    );
+
+    return adjustedPosition;
+}
+
     public bool GetIsReacting() { return isReacting; }
     public ElementalReactions CheckForReaction(RaycastHit hit)
     {

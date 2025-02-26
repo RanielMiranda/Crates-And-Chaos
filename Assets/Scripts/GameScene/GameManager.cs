@@ -37,7 +37,6 @@ public class GameManager : MonoBehaviour
             Destroy(gameObject);
         }
         path = Application.persistentDataPath + "/Levels/";
-        LoadLevel("Test Level");
         Reset();      
     }
 
@@ -163,7 +162,7 @@ public class GameManager : MonoBehaviour
         LoadLevel("Test Level");
 
         // Wait for the level to fully load
-        yield return new WaitForSeconds(0.2f); 
+        yield return new WaitForSeconds(0.1f); 
 
         totalGoalsCovered = 0;
         UpdateGoalCount(0);      

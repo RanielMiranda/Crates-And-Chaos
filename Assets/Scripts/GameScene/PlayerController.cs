@@ -10,6 +10,8 @@ public class PlayerController : MonoBehaviour
     private Vector3 lastDirection = Vector3.zero; // Store last movement direction
     private Animator animator;
     private List<Vector3> metalBoxFuturePositions = new List<Vector3>();
+    private Vector3 futureEBoxPosition;
+
 
     void Start()
     {
@@ -62,6 +64,7 @@ public class PlayerController : MonoBehaviour
                 hitFront.collider.CompareTag("Magnet Box"))
             {
                 animator.SetBool("isBoxInFront", true);
+                futureEBoxPosition = hitFront.collider.GetComponent<ElementalBoxController>().GetFuturePosition(lastDirection);
             }
         }
     }
@@ -131,7 +134,11 @@ public class PlayerController : MonoBehaviour
                     // Empty space
                     if (box.TryToPushBox(direction, moveSpeed) && !box.GetIsReacting())
                     {
-                        StartCoroutine(MoveToPosition(targetPosition));
+                        if (targetPosition.x == futureEBoxPosition.x && targetPosition.z == futureEBoxPosition.z)
+                        {
+                            return;
+                        }
+                        StartCoroutine(MoveToPosition(targetPosition));                     
                     }
                     // Reaction occurred
                     else
@@ -155,7 +162,6 @@ public class PlayerController : MonoBehaviour
         // No obstacles detected, move freely            
         foreach (var futurePosition in metalBoxFuturePositions)
         {
-            Debug.Log("Checking against metal box future pos: " + futurePosition + " and target pos: " + targetPosition);
             if (Mathf.Round(futurePosition.x) == Mathf.Round(targetPosition.x) &&
                 Mathf.Round(futurePosition.z) == Mathf.Round(targetPosition.z))
             {
