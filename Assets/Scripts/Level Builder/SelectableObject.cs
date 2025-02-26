@@ -44,7 +44,6 @@ public class SelectableObject : MonoBehaviour
         }
     }
 
-
     public void SelectObject()
     {
         isSelected = true;

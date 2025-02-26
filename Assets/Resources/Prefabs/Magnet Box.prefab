@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: 1697428754198310565}
   - component: {fileID: 2640884737706682725}
   m_Layer: 10
-  m_Name: MagnetBox
+  m_Name: Magnet Box
   m_TagString: Magnet Box
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

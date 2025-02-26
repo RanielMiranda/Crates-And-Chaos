@@ -5,7 +5,7 @@ using TMPro;
 
 public class LevelManager : MonoBehaviour
 {
-    public string levelName = "MyNewLevel"; // Default level name
+    public string levelName = "Another Level"; // Default level name
     public int gridX = 10, gridY = 10, gridZ = 5; // Default grid size
     
     private string path;

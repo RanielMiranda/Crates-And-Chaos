@@ -13,6 +13,9 @@ public class GameManager : MonoBehaviour
     private Stack<GameState> undoStack = new Stack<GameState>();
     private Stack<GameState> redoStack = new Stack<GameState>();
 
+    private List<MetalBoxController> metalBoxes = new List<MetalBoxController>();
+    private List<ElementalBoxController> magnetBoxes = new List<ElementalBoxController>();    
+
     //Audios
     public AudioClip MoveBox;
     public AudioClip MovePlayer;
@@ -34,6 +37,8 @@ public class GameManager : MonoBehaviour
             Destroy(gameObject);
         }
         path = Application.persistentDataPath + "/Levels/";
+        LoadLevel("Test Level");
+        Reset();      
     }
 
     public void UpdateGoalCount(int value)
@@ -158,10 +163,11 @@ public class GameManager : MonoBehaviour
         LoadLevel("Test Level");
 
         // Wait for the level to fully load
-        yield return new WaitForSeconds(0.5f); 
+        yield return new WaitForSeconds(0.2f); 
 
         totalGoalsCovered = 0;
-        UpdateGoalCount(0); 
+        UpdateGoalCount(0);      
+        CacheMetalAndMagnetBoxes();           
     }
 
     public void Cheat()
@@ -223,8 +229,44 @@ public class GameManager : MonoBehaviour
             }
         }
         pressurePlates = GameObject.FindGameObjectsWithTag("Pressure Plate");
-
         Debug.Log("Level Loaded: " + fileName);
-    }
-}
 
+    }
+
+    private void CacheMetalAndMagnetBoxes()
+    {
+        Debug.Log("Caching Metal and Magnet Boxes");
+        metalBoxes.Clear();
+        magnetBoxes.Clear();
+
+        foreach (GameObject obj in GameObject.FindGameObjectsWithTag("Metal Box"))
+        {
+            var metalBox = obj.GetComponent<MetalBoxController>();
+            if (metalBox != null) metalBoxes.Add(metalBox);
+        }
+
+        foreach (GameObject obj in GameObject.FindGameObjectsWithTag("Magnet Box"))
+        {
+            var magnetBox = obj.GetComponent<ElementalBoxController>();
+            if (magnetBox != null) magnetBoxes.Add(magnetBox);
+        }
+    }
+
+    public void UpdateMetalBoxes()
+    {
+        foreach (var metalBox in metalBoxes)
+        {
+            metalBox.MoveTowardsMagnetBox(magnetBoxes);
+        }
+    }
+    public List<MetalBoxController> GetMetalBoxes()
+    {
+        return metalBoxes;
+    }
+
+    public List<ElementalBoxController> GetMagnetBoxes()
+    {
+        return magnetBoxes;
+    }
+
+}

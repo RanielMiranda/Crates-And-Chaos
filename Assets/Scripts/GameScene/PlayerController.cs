@@ -8,8 +8,8 @@ public class PlayerController : MonoBehaviour
     public LayerMask blockingLayer;
     private bool isMoving = false;
     private Vector3 lastDirection = Vector3.zero; // Store last movement direction
-
     private Animator animator;
+    private List<Vector3> metalBoxFuturePositions = new List<Vector3>();
 
     void Start()
     {
@@ -24,6 +24,10 @@ public class PlayerController : MonoBehaviour
             Destroy(this);
         }        
         
+        foreach (var metalBox in GameManager.Instance.GetMetalBoxes())
+        {
+            metalBoxFuturePositions.Add(metalBox.GetFuturePosition());
+        }
     }
 
     void Update()
@@ -39,8 +43,8 @@ public class PlayerController : MonoBehaviour
         CheckForBoxesAround();
 
         if (movement != Vector3.zero)
-        {
-            TryToMove(movement);
+        {          
+            TryToMove(movement);         
         }   
     }
 
@@ -60,14 +64,6 @@ public class PlayerController : MonoBehaviour
                 animator.SetBool("isBoxInFront", true);
             }
         }
-    }
-
-    // Helper function to check if an object is a box
-    private bool IsBox(Collider collider)
-    {
-        return collider.CompareTag("Box") || collider.CompareTag("Ember Box") ||
-            collider.CompareTag("Volt Box") || collider.CompareTag("Frost Box") || 
-            collider.CompareTag("Magnet Box");
     }
 
     private void GetNonMovementInput()
@@ -92,7 +88,8 @@ public class PlayerController : MonoBehaviour
     }
 
     private void TryToMove(Vector3 direction)
-    {
+    {   
+        GameManager.Instance.UpdateMetalBoxes();          
         var targetPosition = transform.position + direction;
         transform.rotation = Quaternion.LookRotation(direction) * Quaternion.Euler(0, -90, 0);
 
@@ -104,7 +101,7 @@ public class PlayerController : MonoBehaviour
                 !hit.collider.CompareTag("Volt Box") &&
                 !hit.collider.CompareTag("Frost Box") &&
                 !hit.collider.CompareTag("Magnet Box") &&
-                !hit.collider.CompareTag("Goal")) 
+                !hit.collider.CompareTag("Goal"))
             {
                 return; // Block movement
             }
@@ -154,9 +151,21 @@ public class PlayerController : MonoBehaviour
         }
         else
         {
-            // No obstacles detected, move freely
-            animator.SetBool("isPushing", false);
-            StartCoroutine(MoveToPosition(targetPosition));
+        
+        // No obstacles detected, move freely            
+        foreach (var futurePosition in metalBoxFuturePositions)
+        {
+            Debug.Log("Checking against metal box future pos: " + futurePosition + " and target pos: " + targetPosition);
+            if (Mathf.Round(futurePosition.x) == Mathf.Round(targetPosition.x) &&
+                Mathf.Round(futurePosition.z) == Mathf.Round(targetPosition.z))
+            {
+                Debug.Log("Don't Move");
+                return;                   
+            }
+        }
+
+        animator.SetBool("isPushing", false);
+        StartCoroutine(MoveToPosition(targetPosition));          
         }
     }
 
@@ -182,6 +191,11 @@ public class PlayerController : MonoBehaviour
         isMoving = false;
         animator.SetBool("isMoving", false); // Reset animation for movement
         animator.SetBool("isPushing", false);
-    }
 
+        metalBoxFuturePositions.Clear();
+        foreach (var metalBox in GameManager.Instance.GetMetalBoxes())
+        {
+            metalBoxFuturePositions.Add(metalBox.GetFuturePosition());
+        }        
+    }
 }
