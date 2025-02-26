@@ -59,7 +59,9 @@ public class PlayerController : MonoBehaviour
         // Check in front
         if (Physics.Raycast(transform.position, lastDirection, out RaycastHit hitFront, 1f, blockingLayer))
         {
-            if (hitFront.collider.CompareTag("Box") || hitFront.collider.CompareTag("Ember Box") ||
+            if (hitFront.collider.CompareTag("Box"))
+                {animator.SetBool("isBoxInFront", true);}
+            if (hitFront.collider.CompareTag("Ember Box") ||
                 hitFront.collider.CompareTag("Volt Box") || hitFront.collider.CompareTag("Frost Box") || 
                 hitFront.collider.CompareTag("Magnet Box"))
             {
