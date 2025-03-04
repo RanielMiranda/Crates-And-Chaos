@@ -30,13 +30,12 @@ public class GameManager : MonoBehaviour
     {
         if (Instance == null)
         {
-            DontDestroyOnLoad(gameObject);
             Instance = this;
             pressurePlates = GameObject.FindGameObjectsWithTag("Pressure Plate");
         }
-        else if (Instance != this)
+        else
         {
-            enabled = false;
+            Destroy(gameObject);
         }
         path = GetFilePathFromDialog();    
         

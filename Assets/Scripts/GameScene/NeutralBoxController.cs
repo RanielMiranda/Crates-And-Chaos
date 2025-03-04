@@ -7,7 +7,6 @@ public class NeutralBoxController : MonoBehaviour
     public LayerMask blockingLayer;
     private bool isMoving = false;
     private Material boxMaterial;
-    
     private Color originalMaterial;
 
     private void Start() {
