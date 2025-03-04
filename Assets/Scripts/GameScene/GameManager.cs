@@ -301,7 +301,7 @@ public class GameManager : MonoBehaviour
 
     public void LoadOtherLevel()
     {
-        string filePath = GetFilePathFromDialog();
+        path = GetFilePathFromDialog();
         Reset();
     }
 
