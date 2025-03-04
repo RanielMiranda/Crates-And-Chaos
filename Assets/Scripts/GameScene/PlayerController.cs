@@ -47,7 +47,7 @@ public class PlayerController : MonoBehaviour
 
         if (movement != Vector3.zero)
         {   
-            TryToMove(movement);         
+            TryToMove(movement);
         }   
     }
 

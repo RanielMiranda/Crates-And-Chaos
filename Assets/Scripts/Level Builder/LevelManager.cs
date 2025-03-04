@@ -121,7 +121,7 @@ public class LevelManager : MonoBehaviour
                         Debug.LogWarning("Prefab not found for type: " + obj.type);
                     }
                 }
-
+                levelNameInputField.text = Path.GetFileNameWithoutExtension(filePath);
                 Debug.Log("Level Loaded: " + filePath);
             }
             catch (System.Exception e)
@@ -154,4 +154,5 @@ public class LevelManager : MonoBehaviour
                               $"Scale X: {scale.x:F2}\nScale Y: {scale.y:F2}\nScale Z: {scale.z:F2}";
     }
 }
+
 

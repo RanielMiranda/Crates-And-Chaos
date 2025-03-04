@@ -188,8 +188,23 @@ public class ElementalBoxController : MonoBehaviour
         if (!enabled) return;
         if (other.CompareTag("Pressure Plate"))
         {
-            boxMaterial.color = originalMaterial;
-            GameManager.Instance.UpdateGoalCount(-1);
+            // Check if it is still under a pressure plate, else do below
+            var colliders = Physics.OverlapBox(transform.position, transform.localScale / 2);
+            bool isStillUnderPressurePlate = false;
+            foreach (var collider in colliders)
+            {
+                if (collider.CompareTag("Pressure Plate"))
+                {
+                    isStillUnderPressurePlate = true;
+                    GameManager.Instance.UpdateGoalCount(-1);                         
+                    break;
+                }
+            }
+            if (!isStillUnderPressurePlate)
+            {
+                boxMaterial.color = originalMaterial;
+                GameManager.Instance.UpdateGoalCount(-1);               
+            }
         }        
     }   
 

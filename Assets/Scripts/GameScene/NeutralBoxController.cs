@@ -7,9 +7,12 @@ public class NeutralBoxController : MonoBehaviour
     public LayerMask blockingLayer;
     private bool isMoving = false;
     private Material boxMaterial;
+    
+    private Color originalMaterial;
 
     private void Start() {
         boxMaterial = GetComponent<Renderer>().material;
+        originalMaterial = boxMaterial.color;
 
         //Level Editor
         if (GameObject.FindFirstObjectByType<LevelManager>() != null)
@@ -50,21 +53,37 @@ public class NeutralBoxController : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (!enabled) return;        
+        if (!enabled) return;
         if (other.CompareTag("Pressure Plate"))
         {
             boxMaterial.color = GameManager.HighlightColor;
             GameManager.Instance.UpdateGoalCount(1);
+            GameManager.Instance.RecalculateGoalsCovered();
          }
     }   
 
-   private void OnTriggerExit(Collider other)
+    private void OnTriggerExit(Collider other)
     {
-        if (!enabled) return;        
+        if (!enabled) return;
         if (other.CompareTag("Pressure Plate"))
         {
-            boxMaterial.color = GameManager.NormalColor;
-            GameManager.Instance.UpdateGoalCount(-1);
+            // Check if it is still under a pressure plate, else do below
+            var colliders = Physics.OverlapBox(transform.position, transform.localScale / 2);
+            bool isStillUnderPressurePlate = false;
+            foreach (var collider in colliders)
+            {
+                if (collider.CompareTag("Pressure Plate"))
+                {
+                    isStillUnderPressurePlate = true;
+                    break;
+                }
+            }
+            if (!isStillUnderPressurePlate)
+            {
+                boxMaterial.color = originalMaterial;
+                GameManager.Instance.UpdateGoalCount(-1);
+                GameManager.Instance.RecalculateGoalsCovered();                
+            }
         }        
     }   
 

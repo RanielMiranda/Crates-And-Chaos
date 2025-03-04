@@ -46,15 +46,18 @@ public class GameManager : MonoBehaviour
     public void UpdateGoalCount(int value)
     {
         totalGoalsCovered += value;
+        Debug.Log("Total Goals Covered: " + totalGoalsCovered + " / " + pressurePlates.Length);
         var goals = GameObject.FindGameObjectsWithTag("Goal");
-        
+
         bool allGoalsCovered = totalGoalsCovered == pressurePlates.Length;
+        Debug.Log("All Goals Covered: " + allGoalsCovered);
 
         foreach (var goal in goals)
         {
             goal.GetComponent<GateController>().IsOpen(allGoalsCovered);
         }
     }
+    
 
     public bool CheckWinCondition()
     {
@@ -99,7 +102,8 @@ public class GameManager : MonoBehaviour
     public void Undo()
     {
         if (undoStack.Count > 0)
-        {
+        {   
+            //push to redo
             metalBoxes.RemoveAll(box => box == null);
             GameState currentState = new GameState
             {
@@ -129,6 +133,7 @@ public class GameManager : MonoBehaviour
 
             redoStack.Push(currentState);
 
+            //push to undo stack
             GameState lastState = undoStack.Pop();
             GameObject.FindWithTag("Player").transform.position = lastState.playerPosition;
             GameObject.FindWithTag("Player").transform.rotation = lastState.playerRotation;
@@ -189,16 +194,14 @@ public class GameManager : MonoBehaviour
     private IEnumerator ResetAfterLoad()
     {
         LoadLevel();
+        totalGoalsCovered = 0;
 
         // Wait for the level to fully load
         yield return new WaitForSeconds(0.5f); 
-
+        pressurePlates = GameObject.FindGameObjectsWithTag("Pressure Plate");
         CacheMetalAndMagnetBoxes();      
-        totalGoalsCovered = 0;
-        UpdateGoalCount(0);              
+        RecalculateGoalsCovered();          
         SaveState();
-        
-
     }
 
     public void Cheat()
@@ -299,8 +302,9 @@ public class GameManager : MonoBehaviour
     public void LoadOtherLevel()
     {
         string filePath = GetFilePathFromDialog();
-        LoadLevel();
+        Reset();
     }
+
     private void CacheMetalAndMagnetBoxes()
     {
         Debug.Log("Caching Metal and Magnet Boxes");
@@ -336,5 +340,22 @@ public class GameManager : MonoBehaviour
     public List<ElementalBoxController> GetMagnetBoxes()
     {
         return magnetBoxes;
+    }
+
+    public void RecalculateGoalsCovered()
+    {
+        totalGoalsCovered = 0;
+        foreach (GameObject plate in pressurePlates)
+        {
+            Collider[] colliders = Physics.OverlapBox(plate.transform.position, plate.transform.localScale / 2);
+            foreach (Collider col in colliders)
+            {
+                if (col.CompareTag("Box") || col.CompareTag("Ember Box") || col.CompareTag("Volt Box") || col.CompareTag("Frost Box") || col.CompareTag("Magnet Box") || col.CompareTag("Metal Box"))
+                {
+                    totalGoalsCovered++;
+                }
+            }
+        }
+        Debug.Log($"Recalculated: {totalGoalsCovered}/{pressurePlates.Length}");
     }
 }
