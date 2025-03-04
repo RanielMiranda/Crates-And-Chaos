@@ -33,12 +33,36 @@ public class SelectableObject : MonoBehaviour
         {
             if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
             {
+          
                 if (!isSelected) SelectObject();
                 else DeselectObject();
             }
             else
             {
-                objectMover.ClearSelection(); // Deselect everything first
+
+                //Deselecting, Selecting new Object
+                if (objectMover.GetSelectedCount() >= 1 && !isSelected)
+                {
+                    objectMover.ClearSelection(); 
+                    SelectObject();
+                    return;
+                }
+
+                //Deselecting Selected Object
+                if (objectMover.GetSelectedCount() == 1 && isSelected) {              
+                    DeselectObject();
+                    return;
+                }
+                
+                //Deselecting Multiple Object, Selecting new
+                if (objectMover.GetSelectedCount() > 1 && isSelected) {
+                 
+                    objectMover.ClearSelection(); 
+                    SelectObject();
+                    return;
+                }
+
+                //Default
                 SelectObject();
             }
         }

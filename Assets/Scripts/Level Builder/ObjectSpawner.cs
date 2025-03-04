@@ -1,39 +1,93 @@
 using UnityEngine;
 using TMPro;
+using System.Collections;
+using System.Collections.Generic;
 
 public class ObjectSpawner : MonoBehaviour
 {
-    public TMP_Dropdown objectDropdown;
+    public GameObject Player;
+    public GameObject Box;
+    public GameObject Goal;
+    public GameObject Wall;
+    public GameObject EmberBox;
+    public GameObject VoltBox;
+    public GameObject FrostBox;
+    public GameObject MagnetBox;
+    public GameObject MetalBox;
+    public GameObject PressurePlate;
     public Transform spawnPoint;
+
+    private GameObject prefab;
+
+    public void SetPrefab(GameObject objectName) {
+        prefab = objectName;
+        SpawnSelectedObject();
+    }
+
+    public void SpawnPlayer()
+    {
+        int playerCount = GameObject.FindGameObjectsWithTag("Player").Length;
+        if (playerCount >= 1)
+        {
+            Debug.Log("You already have a player in the scene.");
+            return;
+        }        
+        SetPrefab(Player);
+    }
+
+    public void SpawnBox()
+    {
+        SetPrefab(Box);
+    }
+    
+    public void SpawnGoal()
+    {
+        int goalCount = GameObject.FindGameObjectsWithTag("Goal").Length;
+        if (goalCount >= 1)
+        {
+            Debug.Log("You already have a goal in the scene.");
+            return;
+        }        
+        SetPrefab(Goal);
+    }
+
+    public void SpawnWall()
+    {
+        SetPrefab(Wall);
+    }
+
+    public void SpawnEmberBox()
+    {
+        SetPrefab(EmberBox);
+    }
+
+    public void SpawnVoltBox()
+    {
+        SetPrefab(VoltBox);
+    }
+
+    public void SpawnFrostBox()
+    {
+        SetPrefab(FrostBox);
+    }
+
+    public void SpawnMagnetBox()
+    {
+        SetPrefab(MagnetBox);
+    }
+
+    public void SpawnMetalBox()
+    {
+        SetPrefab(MetalBox);
+    }
+
+    public void SpawnPressurePlate()
+    {
+        SetPrefab(PressurePlate);
+    }
 
     public void SpawnSelectedObject()
     {
-        string selected = objectDropdown.options[objectDropdown.value].text;
-        GameObject prefab = Resources.Load<GameObject>("Prefabs/" + selected);
-
-        // Check if the object is a player
-        if (prefab != null && prefab.name == "Player")
-        {
-            // Check the amount of players
-            int playerCount = GameObject.FindGameObjectsWithTag("Player").Length;
-            if (playerCount >= 1)
-            {
-                Debug.Log("You already have a player in the scene.");
-                return;
-            }
-        }
-        // Check if the object is a Goal
-        else if (prefab != null && prefab.name == "Goal")
-        {
-            // Check the amount of goals
-            int goalCount = GameObject.FindGameObjectsWithTag("Goal").Length;
-            if (goalCount >= 1)
-            {
-                Debug.Log("You already have a goal in the scene.");
-                return;
-            }
-        }
-
         // Set the y position based on the prefab
         float y;
         if (prefab != null)
@@ -61,7 +115,7 @@ public class ObjectSpawner : MonoBehaviour
         }
         else
         {
-            Debug.LogError("Prefab not found: " + selected);
+            Debug.LogError("Prefab not found");
         }
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.IO;
+using SFB;
 
 public class GameManager : MonoBehaviour
 {
@@ -23,6 +24,7 @@ public class GameManager : MonoBehaviour
     private int totalGoalsCovered = 0;
     private GameObject[] pressurePlates;
     private string path;
+    private LevelData level; 
 
     private void Awake()
     {
@@ -34,9 +36,10 @@ public class GameManager : MonoBehaviour
         }
         else if (Instance != this)
         {
-            Destroy(gameObject);
+            enabled = false;
         }
-        path = Application.persistentDataPath + "/Levels/";
+        path = GetFilePathFromDialog();    
+        
         Reset();      
     }
 
@@ -68,18 +71,26 @@ public class GameManager : MonoBehaviour
         var boxes = GameObject.FindGameObjectsWithTag("Box");
         foreach (var box in boxes)
         {
-            boxPositions.Add(box.transform.position);
+            if (box != null) boxPositions.Add(box.transform.position);
         }
 
         var elementalBoxPositions = new List<Vector3>();
         var elementalBoxes = GetAllElementalBoxes();
         foreach (var box in elementalBoxes)
         {
-            elementalBoxPositions.Add(box.transform.position);
+            if (box != null) elementalBoxPositions.Add(box.transform.position);
+        }
+
+        var metalBoxPositions = new List<Vector3>();
+        metalBoxes.RemoveAll(box => box == null); // Remove destroyed references
+        foreach (var box in metalBoxes)
+        {
+            if (box != null) metalBoxPositions.Add(box.transform.position);
         }
 
         state.boxPositions = boxPositions;
         state.elementalBoxPositions = elementalBoxPositions;
+        state.metalBoxPositions = metalBoxPositions;
 
         undoStack.Push(state);
         redoStack.Clear();
@@ -89,14 +100,16 @@ public class GameManager : MonoBehaviour
     {
         if (undoStack.Count > 0)
         {
+            metalBoxes.RemoveAll(box => box == null);
             GameState currentState = new GameState
             {
                 playerPosition = GameObject.FindWithTag("Player").transform.position,
                 playerRotation = GameObject.FindWithTag("Player").transform.rotation,
                 boxPositions = new List<Vector3>(),
-                elementalBoxPositions = new List<Vector3>()
+                elementalBoxPositions = new List<Vector3>(),
+                metalBoxPositions = new List<Vector3>()
             };
-
+    
             var boxes = GameObject.FindGameObjectsWithTag("Box");
             foreach (var box in boxes)
             {
@@ -107,6 +120,11 @@ public class GameManager : MonoBehaviour
             foreach (var box in elementalBoxes)
             {
                 currentState.elementalBoxPositions.Add(box.transform.position);
+            }
+
+            foreach (var box in metalBoxes)
+            {
+                currentState.metalBoxPositions.Add(box.transform.position);
             }
 
             redoStack.Push(currentState);
@@ -124,6 +142,11 @@ public class GameManager : MonoBehaviour
             {
                 elementalBoxes[i].transform.position = lastState.elementalBoxPositions[i];
             }
+
+            for (int i = 0; i < metalBoxes.Count; i++)
+            {
+                metalBoxes[i].transform.position = lastState.metalBoxPositions[i];
+            }
         }
     }
 
@@ -131,6 +154,7 @@ public class GameManager : MonoBehaviour
     {
         if (redoStack.Count > 0)
         {
+            metalBoxes.RemoveAll(box => box == null);
             GameState redoState = redoStack.Pop();
             undoStack.Push(redoState);
             var player = GameObject.FindWithTag("Player");
@@ -148,6 +172,11 @@ public class GameManager : MonoBehaviour
             {
                 elementalBoxes[i].transform.position = redoState.elementalBoxPositions[i];
             }
+
+            for (int i = 0; i < metalBoxes.Count; i++)
+            {
+                metalBoxes[i].transform.position = redoState.metalBoxPositions[i];
+            }
         }
     }
 
@@ -159,14 +188,17 @@ public class GameManager : MonoBehaviour
 
     private IEnumerator ResetAfterLoad()
     {
-        LoadLevel("Test Level");
+        LoadLevel();
 
         // Wait for the level to fully load
-        yield return new WaitForSeconds(0.1f); 
+        yield return new WaitForSeconds(0.5f); 
 
+        CacheMetalAndMagnetBoxes();      
         totalGoalsCovered = 0;
-        UpdateGoalCount(0);      
-        CacheMetalAndMagnetBoxes();           
+        UpdateGoalCount(0);              
+        SaveState();
+        
+
     }
 
     public void Cheat()
@@ -192,46 +224,83 @@ public class GameManager : MonoBehaviour
         public Quaternion playerRotation;
         public List<Vector3> boxPositions;
         public List<Vector3> elementalBoxPositions;
+        public List<Vector3> metalBoxPositions;
     }
 
-    public void LoadLevel(string fileName)
+    private string GetFilePathFromDialog()
     {
-        string filePath = path + fileName + ".json";
-        if (!File.Exists(filePath))
-        {
-            Debug.LogError(Application.persistentDataPath + "/Levels/");
-            Debug.LogError("File not found: " + filePath);
-            return;
-        }
+        // Open the file dialog to let the user select a file
+        string[] paths = StandaloneFileBrowser.OpenFilePanel("Select Level", "", "json", true);
 
-        string json = File.ReadAllText(filePath);
-        LevelData level = JsonUtility.FromJson<LevelData>(json);
-        
-        // Clear current scene objects
-        string[] objectTags = { "Wall", "Box", "Goal", "Pressure Plate", "Player", "Ember Box", "Volt Box", "Frost Box", "Magnet Box", "Metal Box" };
-        foreach (string tag in objectTags)
+        if (paths.Length > 0)
         {
-            foreach (GameObject obj in GameObject.FindGameObjectsWithTag(tag))
-            {
-                Destroy(obj);
-            }
+            return paths[0];  // Get the selected file path
         }
-
-        // Rebuild the level
-        foreach (LevelObject obj in level.objects)
+        else
         {
-            GameObject prefab = Resources.Load<GameObject>("Prefabs/" + obj.type);
-            if (prefab != null)
-            {
-                GameObject instance = Instantiate(prefab, new Vector3(obj.position[0], obj.position[1], obj.position[2]), Quaternion.identity);
-                instance.transform.localScale = new Vector3(obj.scale[0], obj.scale[1], obj.scale[2]);
-            }
+            Debug.Log("No file selected.");
+            return null;
         }
-        pressurePlates = GameObject.FindGameObjectsWithTag("Pressure Plate");
-        Debug.Log("Level Loaded: " + fileName);
-
     }
 
+    public void LoadLevel()
+    {  
+        string filePath = path;
+        if (filePath != null)
+        {
+            if (!File.Exists(filePath))
+            {
+                Debug.LogError("File does not exist: " + filePath);
+                return;
+            }
+
+            try
+            {
+                // Read the JSON file content
+                string json = File.ReadAllText(filePath);
+                level = JsonUtility.FromJson<LevelData>(json);
+
+                // Clear current scene objects
+                string[] objectTags = { "Wall", "Box", "Goal", "Pressure Plate", "Player", "Ember Box", "Volt Box", "Frost Box", "Magnet Box", "Metal Box" };
+                foreach (string tag in objectTags)
+                {
+                    foreach (GameObject obj in GameObject.FindGameObjectsWithTag(tag))
+                    {
+                        Destroy(obj);
+                    }
+                }
+
+                // Rebuild the level from the loaded data
+                foreach (LevelObject obj in level.objects)
+                {
+                    // Load the prefab corresponding to the object type
+                    GameObject prefab = Resources.Load<GameObject>("Prefabs/" + obj.type);
+                    if (prefab != null)
+                    {
+                        // Instantiate the prefab at the correct position and scale
+                        GameObject instance = Instantiate(prefab, new Vector3(obj.position[0], obj.position[1], obj.position[2]), Quaternion.identity);
+                        instance.transform.localScale = new Vector3(obj.scale[0], obj.scale[1], obj.scale[2]);
+                    }
+                    else
+                    {
+                        Debug.LogWarning("Prefab not found for type: " + obj.type);
+                    }
+                }
+
+                Debug.Log("Level Loaded: " + filePath);
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError("Error loading level: " + e.Message);
+            }
+        }
+    }
+
+    public void LoadOtherLevel()
+    {
+        string filePath = GetFilePathFromDialog();
+        LoadLevel();
+    }
     private void CacheMetalAndMagnetBoxes()
     {
         Debug.Log("Caching Metal and Magnet Boxes");
@@ -258,6 +327,7 @@ public class GameManager : MonoBehaviour
             metalBox.MoveTowardsMagnetBox(magnetBoxes);
         }
     }
+
     public List<MetalBoxController> GetMetalBoxes()
     {
         return metalBoxes;
@@ -267,5 +337,4 @@ public class GameManager : MonoBehaviour
     {
         return magnetBoxes;
     }
-
 }

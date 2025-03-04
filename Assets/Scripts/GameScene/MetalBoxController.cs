@@ -11,14 +11,16 @@ public class MetalBoxController : MonoBehaviour
     public LayerMask defaultLayer;
     private Vector3 futurePosition;
     private Material boxMaterial;
+    private Color originalMaterial;
 
     private void Start() {
         boxMaterial = GetComponent<Renderer>().material;
+        originalMaterial = boxMaterial.color;
 
         //Level Editor
         if (GameObject.FindFirstObjectByType<LevelManager>() != null)
         {
-            Destroy(this);
+            enabled = false;
         }              
     }    
 
@@ -35,22 +37,76 @@ public class MetalBoxController : MonoBehaviour
             Vector3 directionToMagnet = (nearestMagnet.transform.position - transform.position).normalized;
             Vector3 targetPosition = transform.position + directionToMagnet; // Move by 1 unit
             
-            // Check if there is a wall in the way
-            if (Physics.Raycast(transform.position, directionToMagnet, out RaycastHit hit, 1f, blockingLayer))
+        if (Physics.Raycast(transform.position, directionToMagnet, out RaycastHit hit, 1f, blockingLayer))
+        {
+
+            // If the object hit is a wall or an unmovable object, do not proceed
+            if (!hit.collider.CompareTag("Box") && 
+                !hit.collider.CompareTag("Ember Box") &&
+                !hit.collider.CompareTag("Volt Box") &&
+                !hit.collider.CompareTag("Frost Box") &&
+                !hit.collider.CompareTag("Player"))
             {
+                return; // Block movement
+            }
+
+            //Player
+            if (hit.collider.CompareTag("Player"))
+            {
+                var player = hit.collider.GetComponent<PlayerController>(); // Replace with your actual player script name
+                if (player != null)
+                {
+                    if (player.MetalTryToMove(directionToMagnet)) // Check if the player can move
+                    {
+                        StartCoroutine(MoveToPosition(targetPosition));
+                    }
+                    return;
+                }
+            }            
+
+            if (hit.collider.CompareTag("Box"))
+            {
+                var box = hit.collider.GetComponent<NeutralBoxController>();
+                if (box != null && box.TryToPushBox(directionToMagnet, moveSpeed))
+                {
+                    StartCoroutine(MoveToPosition(targetPosition));
+                }
                 return;
             }
 
-            // Check if there is a player in the way
-            if (Physics.Raycast(transform.position, directionToMagnet, out RaycastHit hit2, 2f, defaultLayer))
+            // Moving elemental boxes
+            if (hit.collider.CompareTag("Ember Box") || hit.collider.CompareTag("Volt Box") ||
+                hit.collider.CompareTag("Frost Box"))
             {
+                var box = hit.collider.GetComponent<ElementalBoxController>();
+
+                if (box != null)
+                {
+                    // Empty space
+                    Vector3 futureEBoxPosition = box.GetFuturePosition(directionToMagnet);
+                    if (box.TryToPushBox(directionToMagnet, moveSpeed) && !box.GetIsReacting())
+                    {
+                        // EBox in front
+                        if (targetPosition.x == futureEBoxPosition.x && targetPosition.z == futureEBoxPosition.z)
+                        {
+                            return;
+                        }
+                        StartCoroutine(MoveToPosition(targetPosition));
+                    }
+                    // Reaction occurred
+                    else
+                    {
+                        box.PerformReaction(box.CheckForReaction(hit), hit, targetPosition, directionToMagnet, moveSpeed);
+                    }
+                }
                 return;
             }
+        }            
             StartCoroutine(MoveToPosition(targetPosition));
             futurePosition = targetPosition + directionToMagnet;
         }
     }
-
+    
     public Vector3 GetFuturePosition()
     {
         return futurePosition;
@@ -110,7 +166,7 @@ public class MetalBoxController : MonoBehaviour
     {
         if (other.CompareTag("Pressure Plate"))
         {
-            boxMaterial.color = GameManager.NormalColor;
+            boxMaterial.color = originalMaterial;
             GameManager.Instance.UpdateGoalCount(-1);
         }        
     }

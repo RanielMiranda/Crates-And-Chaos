@@ -14,7 +14,8 @@ public class NeutralBoxController : MonoBehaviour
         //Level Editor
         if (GameObject.FindFirstObjectByType<LevelManager>() != null)
         {
-            Destroy(this);
+            enabled = false;
+            Debug.Log("Enabled = false");
         }              
     }
 
@@ -49,6 +50,7 @@ public class NeutralBoxController : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
+        if (!enabled) return;        
         if (other.CompareTag("Pressure Plate"))
         {
             boxMaterial.color = GameManager.HighlightColor;
@@ -58,6 +60,7 @@ public class NeutralBoxController : MonoBehaviour
 
    private void OnTriggerExit(Collider other)
     {
+        if (!enabled) return;        
         if (other.CompareTag("Pressure Plate"))
         {
             boxMaterial.color = GameManager.NormalColor;

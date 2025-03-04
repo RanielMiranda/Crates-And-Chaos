@@ -121,5 +121,10 @@ public class ObjectMover : MonoBehaviour
         }
         ObjArray.Clear();
     }
+
+    public int GetSelectedCount()
+    {
+        return ObjArray.Count;
+    }
 }
 

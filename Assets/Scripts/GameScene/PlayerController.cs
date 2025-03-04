@@ -23,9 +23,10 @@ public class PlayerController : MonoBehaviour
         //Level Editor
         if (GameObject.FindFirstObjectByType<LevelManager>() != null)
         {
-            Destroy(this);
+            enabled = false;
         }        
         
+        if (GameManager.Instance != null) 
         foreach (var metalBox in GameManager.Instance.GetMetalBoxes())
         {
             metalBoxFuturePositions.Add(metalBox.GetFuturePosition());
@@ -45,7 +46,7 @@ public class PlayerController : MonoBehaviour
         CheckForBoxesAround();
 
         if (movement != Vector3.zero)
-        {          
+        {   
             TryToMove(movement);         
         }   
     }
@@ -93,10 +94,10 @@ public class PlayerController : MonoBehaviour
     }
 
     private void TryToMove(Vector3 direction)
-    {   
-        GameManager.Instance.UpdateMetalBoxes();          
+    {        
         var targetPosition = transform.position + direction;
         transform.rotation = Quaternion.LookRotation(direction) * Quaternion.Euler(0, -90, 0);
+        GameManager.Instance.UpdateMetalBoxes(); 
 
         if (Physics.Raycast(transform.position, direction, out RaycastHit hit, 1f, blockingLayer))
         {
@@ -161,16 +162,7 @@ public class PlayerController : MonoBehaviour
         else
         {
         
-        // No obstacles detected, move freely            
-        foreach (var futurePosition in metalBoxFuturePositions)
-        {
-            if (Mathf.Round(futurePosition.x) == Mathf.Round(targetPosition.x) &&
-                Mathf.Round(futurePosition.z) == Mathf.Round(targetPosition.z))
-            {
-                Debug.Log("Don't Move");
-                return;                   
-            }
-        }
+        // No obstacles detected, move freely
 
         animator.SetBool("isPushing", false);
         StartCoroutine(MoveToPosition(targetPosition));          
@@ -205,5 +197,19 @@ public class PlayerController : MonoBehaviour
         {
             metalBoxFuturePositions.Add(metalBox.GetFuturePosition());
         }        
+    }
+
+    public bool MetalTryToMove(Vector3 direction)
+    {
+        Vector3 targetPosition = transform.position + direction;
+
+        // Check if space is empty
+        if (!Physics.CheckSphere(targetPosition, 0.1f, blockingLayer)) 
+        {
+            StartCoroutine(MoveToPosition(targetPosition));
+            return true; // Player moved successfully
+        }
+
+        return false; // Player couldn't move
     }
 }

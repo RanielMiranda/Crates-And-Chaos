@@ -7,6 +7,7 @@ public class ElementalBoxController : MonoBehaviour
     public LayerMask blockingLayer;
     private bool isMoving = false;
     private Material boxMaterial;
+    private Color originalMaterial;
     private bool isReacting = false;
     //private int elemental level = 1;
 
@@ -20,11 +21,12 @@ public class ElementalBoxController : MonoBehaviour
     }
     private void Start() {
         boxMaterial = GetComponent<Renderer>().material;
+        originalMaterial = boxMaterial.color;
 
         //Level Editor
         if (GameObject.FindFirstObjectByType<LevelManager>() != null)
         {
-            Destroy(this);
+            enabled = false;
         }              
     }
     public bool TryToPushBox(Vector3 direction, float moveSpeed) 
@@ -54,7 +56,7 @@ public class ElementalBoxController : MonoBehaviour
         ElementalReactions reactions = CheckForReaction(hit);
         if (reactions != ElementalReactions.None) 
         {
-            PerformReaction(reactions, hit, targetPosition, direction, moveSpeed);
+            PerformReaction(reactions, hit, adjustedPosition, direction, moveSpeed);
             isReacting = true;
         }
         return true;
@@ -173,6 +175,7 @@ public class ElementalBoxController : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
+        if (!enabled) return;
         if (other.CompareTag("Pressure Plate"))
         {
             boxMaterial.color = GameManager.HighlightColor;
@@ -182,9 +185,10 @@ public class ElementalBoxController : MonoBehaviour
 
    private void OnTriggerExit(Collider other)
     {
+        if (!enabled) return;
         if (other.CompareTag("Pressure Plate"))
         {
-            boxMaterial.color = GameManager.NormalColor;
+            boxMaterial.color = originalMaterial;
             GameManager.Instance.UpdateGoalCount(-1);
         }        
     }   
