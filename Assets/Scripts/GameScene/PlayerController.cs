@@ -7,6 +7,7 @@ public class PlayerController : MonoBehaviour
     public float moveSpeed = 5f;
     public LayerMask blockingLayer;
     private bool isMoving = false;
+    private bool isWin = false;
     private Vector3 lastDirection = Vector3.zero; // Store last movement direction
     private Animator animator;
     private List<Vector3> metalBoxFuturePositions = new List<Vector3>();
@@ -36,6 +37,7 @@ public class PlayerController : MonoBehaviour
     void Update()
     {
         if (isMoving) return;
+        if (isWin) return;
 
         GetNonMovementInput();
 
@@ -77,7 +79,6 @@ public class PlayerController : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Z)) GameManager.Instance.Undo();
         if (Input.GetKeyDown(KeyCode.X)) GameManager.Instance.Redo();
         if (Input.GetKeyDown(KeyCode.R)) GameManager.Instance.Reset();
-        if (Input.GetKeyDown(KeyCode.C)) GameManager.Instance.Cheat();
     }
 
     private void GetMovementInput(ref Vector3 movement)
@@ -137,11 +138,14 @@ public class PlayerController : MonoBehaviour
                     // Empty space
                     if (box.TryToPushBox(direction, moveSpeed) && !box.GetIsReacting())
                     {
+                        Debug.Log($"Checking if {transform.position} equals current player position (x and z components)");
+                        Debug.Log($"Checking if {targetPosition} equals {futureEBoxPosition} (x and z components)");
                         if (targetPosition.x == futureEBoxPosition.x && targetPosition.z == futureEBoxPosition.z)
                         {
                             return;
                         }
-                        StartCoroutine(MoveToPosition(targetPosition));                     
+                        Debug.Log("Target position is not the same, moving to position");
+                        StartCoroutine(MoveToPosition(targetPosition));
                     }
                     // Reaction occurred
                     else
@@ -156,6 +160,7 @@ public class PlayerController : MonoBehaviour
             if (hit.collider.CompareTag("Goal") && GameManager.Instance.CheckWinCondition())
             {
                 StartCoroutine(MoveToPosition(targetPosition));
+                isWin = true;
                 return;
             }
         }

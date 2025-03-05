@@ -37,8 +37,10 @@ public class GameManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
-        path = GetFilePathFromDialog();    
-        
+        do
+        {
+            path = GetFilePathFromDialog();
+        } while (string.IsNullOrEmpty(path));    
         Reset();      
     }
 

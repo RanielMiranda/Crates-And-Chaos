@@ -63,25 +63,28 @@ public class ElementalBoxController : MonoBehaviour
     }
 
     public Vector3 GetFuturePosition(Vector3 direction)
-{
-    if (isMoving) return transform.position;
-
-    Vector3 targetPosition = transform.position + direction;
-
-    if (!Physics.Raycast(transform.position, direction, out RaycastHit hit, direction.magnitude, blockingLayer))
     {
-        return targetPosition;
+        Vector3 targetPosition = transform.position + direction;
+        Debug.Log("Target Position: " + targetPosition);
+
+        // If there's no obstacle, return targetPosition
+        if (!Physics.Raycast(transform.position, direction, out RaycastHit hit, direction.magnitude, blockingLayer))
+        {
+            Debug.Log("No Obstacle");
+            return targetPosition;
+        }
+        
+        // Stop before the obstacle
+        Vector3 adjustedPosition = hit.point - (direction.normalized * 0.5f);
+        adjustedPosition = new Vector3(
+            Mathf.Round(adjustedPosition.x),
+            transform.position.y,
+            Mathf.Round(adjustedPosition.z)
+        );
+
+        Debug.Log("Adjusted Position: " + adjustedPosition);
+        return adjustedPosition;
     }
-
-    Vector3 adjustedPosition = hit.point - (direction.normalized * 0.5f);
-    adjustedPosition = new Vector3(
-        Mathf.Round(adjustedPosition.x),
-        transform.position.y,
-        Mathf.Round(adjustedPosition.z)
-    );
-
-    return adjustedPosition;
-}
 
     public bool GetIsReacting() { return isReacting; }
     public ElementalReactions CheckForReaction(RaycastHit hit)
@@ -118,18 +121,27 @@ public class ElementalBoxController : MonoBehaviour
     {
         switch (reaction)
         {
-            case ElementalReactions.Overload:
-                var otherBox = GetOtherBox(hit);                
-                /*
-                replace 2f with the formula
-                float traversed = getElementalLevel() + otherBox.getElementalLevel();
+                case ElementalReactions.Overload:
+                    var otherBox = GetOtherBox(hit);
 
-                */ 
-                if (otherBox != null)
-                {
-                    otherBox.TryToPushBox(direction * 2f, moveSpeed);
-                }
-                break;
+                    if (otherBox != null)
+                    {
+                        Vector3 futurePosition = otherBox.GetFuturePosition(direction);
+
+                        // If future position is occupied, push the next box
+                        if (Physics.Raycast(otherBox.transform.position, direction, out RaycastHit nextHit, 1f, blockingLayer))
+                        {
+                            var nextBox = nextHit.collider.GetComponent<ElementalBoxController>();
+                            if (nextBox != null)
+                            {
+                                nextBox.TryToPushBox(direction *2f, moveSpeed); // Transfer energy to next box
+                            }
+                        }
+
+                        // Move the box normally
+                        otherBox.TryToPushBox(direction, moveSpeed);
+                    }
+                    break;
 
             case ElementalReactions.Melt:
                 Debug.Log("Melt has occurred");
