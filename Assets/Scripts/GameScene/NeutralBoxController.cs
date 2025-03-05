@@ -17,7 +17,6 @@ public class NeutralBoxController : MonoBehaviour
         if (GameObject.FindFirstObjectByType<LevelManager>() != null)
         {
             enabled = false;
-            Debug.Log("Enabled = false");
         }              
     }
 
