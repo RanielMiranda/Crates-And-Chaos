@@ -36,8 +36,8 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-        if (isMoving) return;
         if (isWin) return;
+        if (isMoving) return;
 
         GetNonMovementInput();
 
