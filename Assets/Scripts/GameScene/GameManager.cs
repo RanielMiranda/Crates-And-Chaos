@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.IO;
 using SFB;
+using TMPro;
 
 public class GameManager : MonoBehaviour
 {
@@ -25,6 +26,12 @@ public class GameManager : MonoBehaviour
     private GameObject[] pressurePlates;
     private string path;
     private LevelData level; 
+
+    //Help UI
+    public TMP_Text ShortcutInfoText;
+    public GameObject helpUI; 
+    private string[] shortcutPages;
+    private int currentPageIndex = 0;    
 
     private void Awake()
     {
@@ -59,6 +66,22 @@ public class GameManager : MonoBehaviour
         }
     }
     
+    void Start() {
+        shortcutPages = new string[]
+        {
+            "Movement:\n" +
+            "W / ↑ : Move Up\n" +
+            "S / ↓ : Move Down\n" +
+            "A / ← : Move Left\n" +
+            "D / → : Move Right\n",
+
+            "Shortcuts:\n" +
+            "Z : Undo Current Move\n" +
+            "X : Redo Previous Move\n" +
+            "R : Reset Level"
+        };    
+        helpUI.SetActive(false);    
+    }
 
     public bool CheckWinCondition()
     {
@@ -203,13 +226,6 @@ public class GameManager : MonoBehaviour
         CacheMetalAndMagnetBoxes();      
         RecalculateGoalsCovered();          
         SaveState();
-    }
-
-    public void Cheat()
-    {
-        totalGoalsCovered = pressurePlates.Length;
-        UpdateGoalCount(0);
-        Debug.Log("Cheat is working");
     }
 
     private List<GameObject> GetAllElementalBoxes()
@@ -358,5 +374,34 @@ public class GameManager : MonoBehaviour
             }
         }
         Debug.Log($"Recalculated: {totalGoalsCovered}/{pressurePlates.Length}");
+    }
+
+    public void NextHelpPage()
+    {
+        if (currentPageIndex == shortcutPages.Length - 1) return;
+
+        currentPageIndex += 1;
+        ShortcutInfoText.text = shortcutPages[currentPageIndex]; 
+    }
+
+    public void PrevHelpPage()
+    {
+        if (currentPageIndex == 0) return;
+
+        currentPageIndex -= 1;
+        ShortcutInfoText.text = shortcutPages[currentPageIndex]; 
+    }
+
+    public void ToggleHelp()
+    {
+        currentPageIndex = 0;
+        if (helpUI.activeSelf)
+        {
+            helpUI.SetActive(false);
+        }
+        else
+        {
+            helpUI.SetActive(true);
+        }
     }
 }

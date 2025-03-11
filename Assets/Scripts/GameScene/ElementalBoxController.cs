@@ -154,7 +154,7 @@ public class ElementalBoxController : MonoBehaviour
                 Debug.Log("A Magnet was made");
                 //destroy current box and replace collided box infront with magnet object
                 /*
-                    use DestroyReaction() to push the boxes under the map, then create new magnet box
+                    use DestroyReaction() to push the boxes under the map?, then create new magnet box?
                 */
                 break;
 
@@ -163,7 +163,7 @@ public class ElementalBoxController : MonoBehaviour
                 break;
 
             case ElementalReactions.ElementalIncrease:
-                //Debug.Log("Elemental Increase has occurred");
+                Debug.Log("Elemental Increase has occurred");
                 // Destroy current box and GetOtherBox's  elemental level is increased by current box level
                 //create a new method to increase elemental level of collided box
                 break;

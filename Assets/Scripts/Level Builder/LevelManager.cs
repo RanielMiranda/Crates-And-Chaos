@@ -14,6 +14,11 @@ public class LevelManager : MonoBehaviour
     public TMP_InputField levelNameInputField; // Reference to the input field
     public TMP_Text selectedObjectText; // UI text for selected object name
     public TMP_Text objectInfoText; // UI text for object information
+    public TMP_Text ShortcutInfoText;
+    public GameObject helpUI; 
+
+    private string[] shortcutPages;
+    private int currentPageIndex = 0;
 
     void Start()
     {
@@ -23,6 +28,25 @@ public class LevelManager : MonoBehaviour
             Directory.CreateDirectory(path);
         }
         levelNameInputField.onValueChanged.AddListener(UpdateTitleText);
+        helpUI.SetActive(false);
+
+        shortcutPages = new string[]
+        {
+            "Movement:\n" +
+            "W / ↑ : Move Forward\n" +
+            "S / ↓ : Move Backward\n" +
+            "A / ← : Move Left\n" +
+            "D / → : Move Right\n" +
+            "R : Move Up\n" +
+            "F : Move Down",
+
+            "Scaling:\n" +
+            "Q : Increase X Scale\n" +
+            "E : Increase Z Scale\n" +
+            "Z : Decrease X Scale\n" +
+            "C : Decrease Z Scale\n" +
+            "Delete : Delete Selected"
+        };
     }
 
     void UpdateTitleText(string input)
@@ -153,6 +177,35 @@ public class LevelManager : MonoBehaviour
         objectInfoText.text = $"Position X: {pos.x:F2}\nPosition Y: {pos.y:F2}\nPosition Z: {pos.z:F2}\n\n" +
                               $"Scale X: {scale.x:F2}\nScale Y: {scale.y:F2}\nScale Z: {scale.z:F2}";
     }
-}
 
+    public void ToggleHelp()
+    {
+        currentPageIndex = 0;
+        if (helpUI.activeSelf)
+        {
+            helpUI.SetActive(false);
+        }
+        else
+        {
+            helpUI.SetActive(true);
+        }
+    }
+
+    public void UpdateTextNextPage()
+    {
+        if (currentPageIndex == shortcutPages.Length - 1) return;
+
+        currentPageIndex += 1;
+        ShortcutInfoText.text = shortcutPages[currentPageIndex]; 
+    }
+
+    public void UpdateTextPreviousPage()
+    {
+        if (currentPageIndex == 0) return;
+
+        currentPageIndex -= 1;
+        ShortcutInfoText.text = shortcutPages[currentPageIndex]; 
+    }
+
+}
 
