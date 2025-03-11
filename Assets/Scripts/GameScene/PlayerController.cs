@@ -79,6 +79,7 @@ public class PlayerController : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Z)) GameManager.Instance.Undo();
         if (Input.GetKeyDown(KeyCode.X)) GameManager.Instance.Redo();
         if (Input.GetKeyDown(KeyCode.R)) GameManager.Instance.Reset();
+        if (Input.GetKeyDown(KeyCode.C)) GameManager.Instance.Cheat();
     }
 
     private void GetMovementInput(ref Vector3 movement)
@@ -138,13 +139,11 @@ public class PlayerController : MonoBehaviour
                     // Empty space
                     if (box.TryToPushBox(direction, moveSpeed) && !box.GetIsReacting())
                     {
-                        Debug.Log($"Checking if {transform.position} equals current player position (x and z components)");
-                        Debug.Log($"Checking if {targetPosition} equals {futureEBoxPosition} (x and z components)");
+
                         if (targetPosition.x == futureEBoxPosition.x && targetPosition.z == futureEBoxPosition.z)
                         {
                             return;
                         }
-                        Debug.Log("Target position is not the same, moving to position");
                         StartCoroutine(MoveToPosition(targetPosition));
                     }
                     // Reaction occurred

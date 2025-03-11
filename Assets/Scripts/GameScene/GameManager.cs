@@ -215,6 +215,12 @@ public class GameManager : MonoBehaviour
         StartCoroutine(ResetAfterLoad());
     }
 
+    public void Cheat()
+    {
+        totalGoalsCovered = pressurePlates.Length;
+        Debug.Log("Cheat is working");
+        UpdateGoalCount(0);
+    }
     private IEnumerator ResetAfterLoad()
     {
         LoadLevel();

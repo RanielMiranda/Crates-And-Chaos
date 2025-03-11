@@ -65,12 +65,10 @@ public class ElementalBoxController : MonoBehaviour
     public Vector3 GetFuturePosition(Vector3 direction)
     {
         Vector3 targetPosition = transform.position + direction;
-        Debug.Log("Target Position: " + targetPosition);
 
         // If there's no obstacle, return targetPosition
         if (!Physics.Raycast(transform.position, direction, out RaycastHit hit, direction.magnitude, blockingLayer))
         {
-            Debug.Log("No Obstacle");
             return targetPosition;
         }
         
@@ -82,7 +80,6 @@ public class ElementalBoxController : MonoBehaviour
             Mathf.Round(adjustedPosition.z)
         );
 
-        Debug.Log("Adjusted Position: " + adjustedPosition);
         return adjustedPosition;
     }
 
