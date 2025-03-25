@@ -57,13 +57,14 @@ public class LevelManager : MonoBehaviour
 
     public void SaveLevel()
     {
-        Debug.Log("Saving Level...");
+        Debug.Log("Saving level: " + levelNameInputField.text);
         LevelData level = new LevelData
         {
-            
+            levelName = levelNameInputField.text,
             gridSize = new int[] { gridX, gridY, gridZ },
             objects = new List<LevelObject>()
         };
+        Debug.Log("LevelData level's levelName: " + level.levelName);
 
         // Check if there is a player
         if (GameObject.FindGameObjectsWithTag("Player").Length == 0 || GameObject.FindGameObjectsWithTag("Goal").Length == 0)
@@ -146,7 +147,6 @@ public class LevelManager : MonoBehaviour
                     }
                 }
                 levelNameInputField.text = Path.GetFileNameWithoutExtension(filePath);
-                Debug.Log("Level Loaded: " + filePath);
             }
             catch (System.Exception e)
             {

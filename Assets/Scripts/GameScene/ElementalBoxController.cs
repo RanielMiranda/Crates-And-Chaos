@@ -188,7 +188,7 @@ public class ElementalBoxController : MonoBehaviour
         if (other.CompareTag("Pressure Plate"))
         {
             boxMaterial.color = GameManager.HighlightColor;
-            GameManager.Instance.UpdateGoalCount(1);
+            GameManager.Instance.UpdateGoalCount();
          }
     }   
 
@@ -205,14 +205,14 @@ public class ElementalBoxController : MonoBehaviour
                 if (collider.CompareTag("Pressure Plate"))
                 {
                     isStillUnderPressurePlate = true;
-                    GameManager.Instance.UpdateGoalCount(-1);                         
+                    GameManager.Instance.UpdateGoalCount();                         
                     break;
                 }
             }
             if (!isStillUnderPressurePlate)
             {
                 boxMaterial.color = originalMaterial;
-                GameManager.Instance.UpdateGoalCount(-1);               
+                GameManager.Instance.UpdateGoalCount();               
             }
         }        
     }   

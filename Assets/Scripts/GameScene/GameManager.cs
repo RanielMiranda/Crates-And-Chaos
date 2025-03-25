@@ -10,6 +10,7 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
     public GameObject magnetBoxPrefab;
+
     public static Color NormalColor = new Color(0.9838573f, 1f, 0.485849f, 1f);
     public static Color HighlightColor = new Color(1f, 1f, 1f, 1f);
     private Stack<GameState> undoStack = new Stack<GameState>();
@@ -31,7 +32,11 @@ public class GameManager : MonoBehaviour
     public TMP_Text ShortcutInfoText;
     public GameObject helpUI; 
     private string[] shortcutPages;
-    private int currentPageIndex = 0;    
+    private int currentPageIndex = 0;       
+    public GameObject winScreenUI;  
+    public GameObject gameplayUI;  
+    public TMP_Text levelNameText; 
+    
 
     private void Awake()
     {
@@ -51,19 +56,18 @@ public class GameManager : MonoBehaviour
         Reset();      
     }
 
-    public void UpdateGoalCount(int value)
+    public void UpdateGoalCount()
     {
-        totalGoalsCovered += value;
-        Debug.Log("Total Goals Covered: " + totalGoalsCovered + " / " + pressurePlates.Length);
-        var goals = GameObject.FindGameObjectsWithTag("Goal");
+        RecalculateGoalsCovered();
+        bool winConditionMet = CheckWinCondition(); // Call the method and store the result
+            GameObject goal = GameObject.FindGameObjectWithTag("Goal"); // Singular, finds the first match
 
-        bool allGoalsCovered = totalGoalsCovered == pressurePlates.Length;
-        Debug.Log("All Goals Covered: " + allGoalsCovered);
-
-        foreach (var goal in goals)
-        {
-            goal.GetComponent<GateController>().IsOpen(allGoalsCovered);
-        }
+            GateController gate = goal.GetComponent<GateController>();
+            if (gate != null)
+            {
+                gate.IsOpen(winConditionMet); // Update the gate's state
+            }
+                 
     }
     
     void Start() {
@@ -219,7 +223,7 @@ public class GameManager : MonoBehaviour
     {
         totalGoalsCovered = pressurePlates.Length;
         Debug.Log("Cheat is working");
-        UpdateGoalCount(0);
+        UpdateGoalCount();
     }
     private IEnumerator ResetAfterLoad()
     {
@@ -279,13 +283,13 @@ public class GameManager : MonoBehaviour
                 Debug.LogError("File does not exist: " + filePath);
                 return;
             }
-
             try
             {
                 // Read the JSON file content
                 string json = File.ReadAllText(filePath);
                 level = JsonUtility.FromJson<LevelData>(json);
 
+                Debug.Log("Loaded JSON: " + json);
                 // Clear current scene objects
                 string[] objectTags = { "Wall", "Box", "Goal", "Pressure Plate", "Player", "Ember Box", "Volt Box", "Frost Box", "Magnet Box", "Metal Box" };
                 foreach (string tag in objectTags)
@@ -365,7 +369,7 @@ public class GameManager : MonoBehaviour
         return magnetBoxes;
     }
 
-    public void RecalculateGoalsCovered()
+    private void RecalculateGoalsCovered()
     {
         totalGoalsCovered = 0;
         foreach (GameObject plate in pressurePlates)
@@ -374,7 +378,7 @@ public class GameManager : MonoBehaviour
             foreach (Collider col in colliders)
             {
                 if (col.CompareTag("Box") || col.CompareTag("Ember Box") || col.CompareTag("Volt Box") || col.CompareTag("Frost Box") || col.CompareTag("Magnet Box") || col.CompareTag("Metal Box"))
-                {
+                {                  
                     totalGoalsCovered++;
                 }
             }
@@ -409,5 +413,18 @@ public class GameManager : MonoBehaviour
         {
             helpUI.SetActive(true);
         }
+    }
+
+    public void winReset() {
+        Reset();        
+        winScreenUI.SetActive(false);
+        gameplayUI.SetActive(true);
+    }
+
+    public void showWinScreenUI() {
+        Debug.Log(level.levelName.ToString());
+        levelNameText.text = level.levelName;
+        winScreenUI.SetActive(true);
+        gameplayUI.SetActive(false);
     }
 }

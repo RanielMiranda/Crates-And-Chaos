@@ -155,21 +155,39 @@ public class MetalBoxController : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
+        if (!enabled) return;
         if (other.CompareTag("Pressure Plate"))
         {
+            Debug.Log("Metal box entered pressure plate: " + other.name);
             boxMaterial.color = GameManager.HighlightColor;
-            GameManager.Instance.UpdateGoalCount(1);
+            GameManager.Instance.UpdateGoalCount();
          }
     }   
 
-   private void OnTriggerExit(Collider other)
+    private void OnTriggerExit(Collider other)
     {
+        if (!enabled) return;
         if (other.CompareTag("Pressure Plate"))
         {
-            boxMaterial.color = originalMaterial;
-            GameManager.Instance.UpdateGoalCount(-1);
+            // Check if it is still under a pressure plate, else do below
+            var colliders = Physics.OverlapBox(transform.position, transform.localScale / 2);
+            bool isStillUnderPressurePlate = false;
+            foreach (var collider in colliders)
+            {
+                if (collider.CompareTag("Pressure Plate"))
+                {
+                    isStillUnderPressurePlate = true;
+                    break;
+                }
+            }
+            if (!isStillUnderPressurePlate)
+            {
+                Debug.Log("Metal box entered pressure plate: " + other.name);
+                boxMaterial.color = originalMaterial;
+                GameManager.Instance.UpdateGoalCount();             
+            }
         }        
-    }
+    }  
 
     public bool IsMoving()
     {

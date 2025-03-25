@@ -55,8 +55,7 @@ public class NeutralBoxController : MonoBehaviour
         if (other.CompareTag("Pressure Plate"))
         {
             boxMaterial.color = GameManager.HighlightColor;
-            GameManager.Instance.UpdateGoalCount(1);
-            GameManager.Instance.RecalculateGoalsCovered();
+            GameManager.Instance.UpdateGoalCount();
          }
     }   
 
@@ -79,8 +78,7 @@ public class NeutralBoxController : MonoBehaviour
             if (!isStillUnderPressurePlate)
             {
                 boxMaterial.color = originalMaterial;
-                GameManager.Instance.UpdateGoalCount(-1);
-                GameManager.Instance.RecalculateGoalsCovered();                
+                GameManager.Instance.UpdateGoalCount();             
             }
         }        
     }   

@@ -17,7 +17,10 @@ public class SceneLoader : MonoBehaviour
     {
         SceneManager.LoadScene("GameLevel");
     }
-
+    public void LoadLevelSelector()
+    {
+        SceneManager.LoadScene("LevelSelector");
+    }
     public void QuitGame()
     {
         Application.Quit();
