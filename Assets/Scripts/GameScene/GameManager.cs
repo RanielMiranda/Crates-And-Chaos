@@ -25,7 +25,7 @@ public class GameManager : MonoBehaviour
 
     private int totalGoalsCovered = 0;
     private GameObject[] pressurePlates;
-    private string path;
+    public static string SelectedLevelPath;
     private LevelData level; 
 
     //Help UI
@@ -49,11 +49,11 @@ public class GameManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
-        do
+        if (!string.IsNullOrEmpty(SelectedLevelPath))
         {
-            path = GetFilePathFromDialog();
-        } while (string.IsNullOrEmpty(path));    
-        Reset();      
+            SelectedLevelPath = SelectedLevelPath;
+        }
+        Reset();
     }
 
     public void UpdateGoalCount()
@@ -257,25 +257,9 @@ public class GameManager : MonoBehaviour
         public List<Vector3> metalBoxPositions;
     }
 
-    private string GetFilePathFromDialog()
-    {
-        // Open the file dialog to let the user select a file
-        string[] paths = StandaloneFileBrowser.OpenFilePanel("Select Level", "", "json", true);
-
-        if (paths.Length > 0)
-        {
-            return paths[0];  // Get the selected file path
-        }
-        else
-        {
-            Debug.Log("No file selected.");
-            return null;
-        }
-    }
-
     public void LoadLevel()
     {  
-        string filePath = path;
+        string filePath = SelectedLevelPath;
         if (filePath != null)
         {
             if (!File.Exists(filePath))
@@ -328,7 +312,7 @@ public class GameManager : MonoBehaviour
 
     public void LoadOtherLevel()
     {
-        path = GetFilePathFromDialog();
+        Debug.Log("Loading Other Level");
         Reset();
     }
 
