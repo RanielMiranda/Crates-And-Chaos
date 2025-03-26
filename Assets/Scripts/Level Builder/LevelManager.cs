@@ -32,20 +32,19 @@ public class LevelManager : MonoBehaviour
 
         shortcutPages = new string[]
         {
-            "Movement:\n" +
-            "W / ↑ : Move Forward\n" +
-            "S / ↓ : Move Backward\n" +
-            "A / ← : Move Left\n" +
-            "D / → : Move Right\n" +
-            "R : Move Up\n" +
-            "F : Move Down",
+            "W / ↑ : Move Selected Up\n" +
+            "S / ↓ : Move Selected Down\n" +
+            "A / ← : Move Selected Left\n" +
+            "D / → : Move Selected Right\n" +
+            "R : Move Selected Up Vertically\n" +
+            "F : Move Selected Down Vertically\n",
 
-            "Scaling:\n" +
-            "Q : Increase X Scale\n" +
-            "E : Increase Z Scale\n" +
-            "Z : Decrease X Scale\n" +
-            "C : Decrease Z Scale\n" +
-            "Delete : Delete Selected"
+            "Q : Increase Selected's X Scale\n" +
+            "E : Increase Selected's Z Scale\n" +
+            "Z : Decrease Selected's X Scale\n" +
+            "C : Decrease Selected's Z Scale\n" +
+            "Delete : Delete Selected\n" +
+            "Shift + Click : Select Multiple Objects\n"
         };
     }
 

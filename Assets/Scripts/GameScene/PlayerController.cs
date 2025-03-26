@@ -159,7 +159,8 @@ public class PlayerController : MonoBehaviour
             if (hit.collider.CompareTag("Goal") && GameManager.Instance.CheckWinCondition())
             {
                 StartCoroutine(MoveToPosition(targetPosition));
-                GameManager.Instance.showWinScreenUI();
+                GameManager.Instance.isWin = true;                
+                GameManager.Instance.toggleWinScreenUI();
                 isWin = true;
                 return;
             }

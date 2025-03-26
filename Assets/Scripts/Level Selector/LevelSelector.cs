@@ -9,6 +9,7 @@ public class LevelSelector : MonoBehaviour
 {
     public GameObject buttonPrefab;
     public Transform gridParent;
+    private int levelCount = 0;
 
     private void Start()
     {
@@ -26,7 +27,8 @@ public class LevelSelector : MonoBehaviour
             button.onClick.AddListener(() => LoadLevel(levelName));
 
             TMP_Text buttonText = buttonObj.GetComponentInChildren<TMP_Text>();
-            if (buttonText != null) buttonText.text = levelName;
+            if (buttonText != null) buttonText.text = levelCount.ToString();
+            levelCount++;
         }
     }
 
@@ -46,8 +48,8 @@ public class LevelSelector : MonoBehaviour
     void LoadLevel(string levelName)
     {
         // Set the path in GameManager before loading the scene
-        GameManager.SelectedLevelPath = Application.dataPath + "/Resources/Levels/" + levelName + ".json";
-        Debug.Log("Loading Level: " + levelName);
+        GameManager.SelectedLevelName = levelName; // Store the name only, not the full path
+        Debug.Log("Selected Level: " + levelName);
         SceneManager.LoadScene("GameLevel");
     }
 }

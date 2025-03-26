@@ -25,17 +25,20 @@ public class GameManager : MonoBehaviour
 
     private int totalGoalsCovered = 0;
     private GameObject[] pressurePlates;
-    public static string SelectedLevelPath;
+    public static string SelectedLevelName;
     private LevelData level; 
 
     //Help UI
-    public TMP_Text ShortcutInfoText;
-    public GameObject helpUI; 
     private string[] shortcutPages;
-    private int currentPageIndex = 0;       
+    private int currentPageIndex = 0;
+    public bool isWin = false;
+    public GameObject helpUI;        
     public GameObject winScreenUI;  
-    public GameObject gameplayUI;  
+    public GameObject gameplayUI;
+    public GameObject menuCloseButton;  
+    public TMP_Text ShortcutInfoText;    
     public TMP_Text levelNameText; 
+    public TMP_Text levelClearedText;    
     
 
     private void Awake()
@@ -49,9 +52,9 @@ public class GameManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
-        if (!string.IsNullOrEmpty(SelectedLevelPath))
+        if (!string.IsNullOrEmpty(SelectedLevelName))
         {
-            SelectedLevelPath = SelectedLevelPath;
+            SelectedLevelName = SelectedLevelName;
         }
         Reset();
     }
@@ -216,6 +219,7 @@ public class GameManager : MonoBehaviour
     public void Reset()
     {
         Debug.Log("Resetting");
+        isWin = false;
         StartCoroutine(ResetAfterLoad());
     }
 
@@ -259,21 +263,25 @@ public class GameManager : MonoBehaviour
 
     public void LoadLevel()
     {  
-        string filePath = SelectedLevelPath;
-        if (filePath != null)
+        string levelName = SelectedLevelName;
+        if (!string.IsNullOrEmpty(levelName))
         {
-            if (!File.Exists(filePath))
+            // Load the TextAsset from Resources
+            TextAsset levelAsset = Resources.Load<TextAsset>("Levels/" + levelName);
+            if (levelAsset == null)
             {
-                Debug.LogError("File does not exist: " + filePath);
+                Debug.LogError("Level not found in Resources/Levels: " + levelName);
                 return;
             }
+
             try
             {
-                // Read the JSON file content
-                string json = File.ReadAllText(filePath);
+                // Use the TextAsset's text content
+                string json = levelAsset.text;
                 level = JsonUtility.FromJson<LevelData>(json);
 
                 Debug.Log("Loaded JSON: " + json);
+
                 // Clear current scene objects
                 string[] objectTags = { "Wall", "Box", "Goal", "Pressure Plate", "Player", "Ember Box", "Volt Box", "Frost Box", "Magnet Box", "Metal Box" };
                 foreach (string tag in objectTags)
@@ -287,11 +295,9 @@ public class GameManager : MonoBehaviour
                 // Rebuild the level from the loaded data
                 foreach (LevelObject obj in level.objects)
                 {
-                    // Load the prefab corresponding to the object type
                     GameObject prefab = Resources.Load<GameObject>("Prefabs/" + obj.type);
                     if (prefab != null)
                     {
-                        // Instantiate the prefab at the correct position and scale
                         GameObject instance = Instantiate(prefab, new Vector3(obj.position[0], obj.position[1], obj.position[2]), Quaternion.identity);
                         instance.transform.localScale = new Vector3(obj.scale[0], obj.scale[1], obj.scale[2]);
                     }
@@ -301,12 +307,16 @@ public class GameManager : MonoBehaviour
                     }
                 }
 
-                Debug.Log("Level Loaded: " + filePath);
+                Debug.Log("Level Loaded: " + levelName);
             }
             catch (System.Exception e)
             {
                 Debug.LogError("Error loading level: " + e.Message);
             }
+        }
+        else
+        {
+            Debug.LogError("No level selected!");
         }
     }
 
@@ -405,10 +415,20 @@ public class GameManager : MonoBehaviour
         gameplayUI.SetActive(true);
     }
 
-    public void showWinScreenUI() {
+    public void toggleWinScreenUI() {
+        if (!CheckWinCondition()) 
+        {
+            levelClearedText.text = "Pause Menu";
+            menuCloseButton.SetActive(true);         
+        }
+        if (CheckWinCondition() && isWin) 
+        {
+            levelClearedText.text = "Level Cleared!";
+            menuCloseButton.SetActive(false);
+        } 
         Debug.Log(level.levelName.ToString());
         levelNameText.text = level.levelName;
-        winScreenUI.SetActive(true);
-        gameplayUI.SetActive(false);
+        winScreenUI.SetActive(!winScreenUI.activeSelf);
+        gameplayUI.SetActive(!gameplayUI.activeSelf);
     }
 }
