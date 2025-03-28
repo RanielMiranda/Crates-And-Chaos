@@ -17,7 +17,9 @@ public class GameManager : MonoBehaviour
     private Stack<GameState> redoStack = new Stack<GameState>();
 
     private List<MetalBoxController> metalBoxes = new List<MetalBoxController>();
-    private List<ElementalBoxController> magnetBoxes = new List<ElementalBoxController>();    
+    private List<ElementalBoxController> magnetBoxes = new List<ElementalBoxController>();   
+    private bool hasDestroy; 
+    
 
     //Audios
     public AudioClip MoveBox;
@@ -176,7 +178,14 @@ public class GameManager : MonoBehaviour
 
             for (int i = 0; i < elementalBoxes.Count; i++)
             {
-                elementalBoxes[i].transform.position = lastState.elementalBoxPositions[i];
+                if (i < lastState.elementalBoxPositions.Count)
+                {
+                    elementalBoxes[i].transform.position = lastState.elementalBoxPositions[i];
+                }
+                else
+                {
+                    elementalBoxes[i].transform.position += Vector3.down * 10;
+                }
             }
 
             for (int i = 0; i < metalBoxes.Count; i++)
@@ -326,7 +335,7 @@ public class GameManager : MonoBehaviour
         Reset();
     }
 
-    private void CacheMetalAndMagnetBoxes()
+    public void CacheMetalAndMagnetBoxes()
     {
         Debug.Log("Caching Metal and Magnet Boxes");
         metalBoxes.Clear();

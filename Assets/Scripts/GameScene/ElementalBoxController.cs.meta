@@ -1,2 +1,12 @@
 fileFormatVersion: 2
 guid: e6f3cb51ef214d94cb87422d36223d34
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - magnetBoxPrefab: {fileID: 1124339206545390922, guid: df88b7b878c78be409b995a6776f5ce0, type: 3}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

@@ -9,7 +9,7 @@ public class LevelSelector : MonoBehaviour
 {
     public GameObject buttonPrefab;
     public Transform gridParent;
-    private int levelCount = 0;
+    private int levelCount = 1;
 
     private void Start()
     {

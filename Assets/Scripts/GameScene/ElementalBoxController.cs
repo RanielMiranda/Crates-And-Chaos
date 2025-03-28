@@ -17,7 +17,6 @@ public class ElementalBoxController : MonoBehaviour
         Overload,
         Melt,
         Magnet,
-        ElementalIncrease,
     }
     private void Start() {
         boxMaterial = GetComponent<Renderer>().material;
@@ -102,15 +101,6 @@ public class ElementalBoxController : MonoBehaviour
         if (currentBoxTag == "Frost Box" && otherBoxTag == "Volt Box")
             return ElementalReactions.Magnet;
 
-        //elemental increase    
-        if (currentBoxTag == "Ember Box" && otherBoxTag == "Ember Box")
-                return ElementalReactions.ElementalIncrease;
-        if (currentBoxTag == "Volt Box" && otherBoxTag == "Volt Box")
-                return ElementalReactions.ElementalIncrease;
-        if (currentBoxTag == "Frost Box" && otherBoxTag == "Frost Box")
-                return ElementalReactions.ElementalIncrease;
-        
-
         return ElementalReactions.None;
     }
     
@@ -149,20 +139,20 @@ public class ElementalBoxController : MonoBehaviour
 
             case ElementalReactions.Magnet:
                 Debug.Log("A Magnet was made");
-                //destroy current box and replace collided box infront with magnet object
-                /*
-                    use DestroyReaction() to push the boxes under the map?, then create new magnet box?
-                */
+                var otherbox = GetOtherBox(hit);
+
+                DestroyReaction(gameObject);
+
+                // Create new magnet box at the position of the other box
+                GameObject newMagnetBox = Instantiate(GameManager.Instance.magnetBoxPrefab, otherbox.transform.position, Quaternion.identity);
+                newMagnetBox.GetComponent<ElementalBoxController>().enabled = true;
+
+                DestroyReaction(otherbox.gameObject);    
+                GameManager.Instance.CacheMetalAndMagnetBoxes();                            
                 break;
 
             case ElementalReactions.None:
                 // No reaction, do nothing
-                break;
-
-            case ElementalReactions.ElementalIncrease:
-                Debug.Log("Elemental Increase has occurred");
-                // Destroy current box and GetOtherBox's  elemental level is increased by current box level
-                //create a new method to increase elemental level of collided box
                 break;
         }
 
