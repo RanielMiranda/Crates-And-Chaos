@@ -119,23 +119,21 @@ public class MetalBoxController : MonoBehaviour
 
         foreach (var magnet in magnetBoxes)
         {
+            if (magnet.transform.position.y != transform.position.y) continue;
+            float distance;
             if (magnet.transform.position.x == transform.position.x)
             {
-                float distance = Mathf.Abs(magnet.transform.position.z - transform.position.z);
-                if (distance < minDistance)
-                {
-                    minDistance = distance;
-                    nearest = magnet;
-                }
+                distance = Mathf.Abs(magnet.transform.position.z - transform.position.z);
             }
             else if (magnet.transform.position.z == transform.position.z)
             {
-                float distance = Mathf.Abs(magnet.transform.position.x - transform.position.x);
-                if (distance < minDistance)
-                {
-                    minDistance = distance;
-                    nearest = magnet;
-                }
+                distance = Mathf.Abs(magnet.transform.position.x - transform.position.x);
+            }
+            else continue;
+            if (distance < minDistance)
+            {
+                minDistance = distance;
+                nearest = magnet;
             }
         }
         return nearest;

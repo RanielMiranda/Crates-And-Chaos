@@ -15,14 +15,16 @@ public class LevelManager : MonoBehaviour
     public TMP_Text selectedObjectText; // UI text for selected object name
     public TMP_Text objectInfoText; // UI text for object information
     public TMP_Text ShortcutInfoText;
+    public TMP_Text SaveInfoText;
     public GameObject helpUI; 
+    public GameObject savedUI;
 
     private string[] shortcutPages;
     private int currentPageIndex = 0;
 
     void Start()
     {
-        path = Application.persistentDataPath + "/Levels/";
+        path = Application.persistentDataPath + "/CustomLevels/";
         if (!Directory.Exists(path))
         {
             Directory.CreateDirectory(path);
@@ -44,7 +46,10 @@ public class LevelManager : MonoBehaviour
             "Z : Decrease Selected's X Scale\n" +
             "C : Decrease Selected's Z Scale\n" +
             "Delete : Delete Selected\n" +
-            "Shift + Click : Select Multiple Objects\n"
+            "Shift + Click : Select Multiple Objects\n",
+
+            "Only one player and one goal are allowed per level.\n" +
+            "Walls and Boxes position should be at even numbers."
         };
     }
 
@@ -96,6 +101,7 @@ public class LevelManager : MonoBehaviour
         string json = JsonUtility.ToJson(level, true);
         File.WriteAllText(path + levelName + ".json", json);
         Debug.Log("Level saved: " + path + levelName + ".json");
+        ToggleSave();
     }
 
     public void LoadLevel()
@@ -206,5 +212,36 @@ public class LevelManager : MonoBehaviour
         ShortcutInfoText.text = shortcutPages[currentPageIndex]; 
     }
 
+    public void ToggleSave()
+    {
+    if (savedUI.activeSelf)
+        {
+            savedUI.SetActive(false);
+        }
+        else
+        {
+            SaveInfoText.text = "Level Name: " + levelNameInputField.text +"\n has been saved to: " +"\n" + path + levelNameInputField.text + ".json"; 
+            savedUI.SetActive(true);
+            OpenSaveLocation();
+        }
+    }
+
+    void OpenSaveLocation()
+    {
+        string filePath = Path.Combine(path, levelNameInputField.text + ".json");
+        string folderPath = Path.GetDirectoryName(filePath); // Get the folder containing the file
+
+        if (Directory.Exists(folderPath))
+        {
+            // Open the folder in the system's file explorer
+            string url = "file:///" + folderPath.Replace("\\", "/"); // Convert to URL format
+            Application.OpenURL(url);
+            Debug.Log($"Opening file explorer at: {folderPath}");
+        }
+        else
+        {
+            Debug.LogError($"Folder does not exist: {folderPath}");
+        }
+    }
 }
 

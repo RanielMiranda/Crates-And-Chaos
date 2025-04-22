@@ -80,6 +80,7 @@ public class PlayerController : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.X)) GameManager.Instance.Redo();
         if (Input.GetKeyDown(KeyCode.R)) GameManager.Instance.Reset();
         if (Input.GetKeyDown(KeyCode.C)) GameManager.Instance.Cheat();
+        if (Input.GetKeyDown(KeyCode.Escape)) GameManager.Instance.toggleWinScreenUI();
     }
 
     private void GetMovementInput(ref Vector3 movement)

@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using TMPro;
+using SFB;
 
 
 public class LevelSelector : MonoBehaviour
@@ -52,4 +53,41 @@ public class LevelSelector : MonoBehaviour
         Debug.Log("Selected Level: " + levelName);
         SceneManager.LoadScene("GameLevel");
     }
+
+void LoadCustomLevel()
+    {
+        // Open file browser to select a JSON level file
+        string[] paths = StandaloneFileBrowser.OpenFilePanel("Select Custom Level File", "", "json", false);
+        if (paths.Length > 0 && !string.IsNullOrEmpty(paths[0]))
+        {
+            string sourcePath = paths[0];
+            string fileName = Path.GetFileName(sourcePath);
+            string destinationPath = Application.persistentDataPath + "/CustomLevels/" + fileName;
+
+            try
+            {
+                // Ensure the CustomLevels directory exists
+                string customLevelsPath = Application.persistentDataPath + "/CustomLevels/";
+                if (!Directory.Exists(customLevelsPath))
+                {
+                    Directory.CreateDirectory(customLevelsPath);
+                }
+
+                // Copy the file to persistent data path
+                File.Copy(sourcePath, destinationPath, true);
+                Debug.Log($"Custom level copied to: {destinationPath}");
+
+                // Load the level
+                string levelName = Path.GetFileNameWithoutExtension(fileName);
+                GameManager.SelectedLevelName = levelName;
+                Debug.Log("Selected Level: " + levelName);
+                SceneManager.LoadScene("GameLevel");
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"Failed to copy custom level file: {e.Message}");
+            }
+        }
+    }
+
 }
