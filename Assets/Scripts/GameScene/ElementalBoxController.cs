@@ -134,7 +134,8 @@ public class ElementalBoxController : MonoBehaviour
                 Debug.Log("Melt has occurred");
                 // Destroy current box and collided box based on elemental level, if else statement and decrement elemental level
                 DestroyReaction(hit.collider.gameObject);
-                DestroyReaction(gameObject);                
+                DestroyReaction(gameObject);      
+                AudioManager.Instance.PlayMoveBox();          
                 break;
 
             case ElementalReactions.Magnet:
