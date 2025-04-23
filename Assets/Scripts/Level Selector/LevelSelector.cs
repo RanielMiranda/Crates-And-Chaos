@@ -5,7 +5,6 @@ using UnityEngine.SceneManagement;
 using TMPro;
 using SFB;
 
-
 public class LevelSelector : MonoBehaviour
 {
     public GameObject buttonPrefab;
@@ -48,34 +47,61 @@ public class LevelSelector : MonoBehaviour
 
     void LoadLevel(string levelName)
     {
-        // Set the path in GameManager before loading the scene
-        GameManager.SelectedLevelName = levelName; // Store the name only, not the full path
+        GameManager.SelectedLevelName = levelName;
         Debug.Log("Selected Level: " + levelName);
         SceneManager.LoadScene("GameLevel");
     }
 
-void LoadCustomLevel()
+    void LoadCustomLevel()
     {
-        // Open file browser to select a JSON level file
-        string[] paths = StandaloneFileBrowser.OpenFilePanel("Select Custom Level File", "", "json", false);
+        // Define the initial directory for the file browser
+        string initialPath = Application.persistentDataPath + "/CustomLevels/";
+
+        // Ensure the CustomLevels directory exists
+        if (!Directory.Exists(initialPath))
+        {
+            Directory.CreateDirectory(initialPath);
+        }
+
+        // Open file browser starting at the CustomLevels folder
+        string[] paths = StandaloneFileBrowser.OpenFilePanel("Select Custom Level File", initialPath, "json", false);
         if (paths.Length > 0 && !string.IsNullOrEmpty(paths[0]))
         {
             string sourcePath = paths[0];
             string fileName = Path.GetFileName(sourcePath);
-            string destinationPath = Application.persistentDataPath + "/CustomLevels/" + fileName;
+            string destinationPath = Path.Combine(Application.persistentDataPath, "CustomLevels", fileName);
 
             try
             {
-                // Ensure the CustomLevels directory exists
-                string customLevelsPath = Application.persistentDataPath + "/CustomLevels/";
-                if (!Directory.Exists(customLevelsPath))
+                // Check if the source is already in the destination
+                if (sourcePath != destinationPath)
                 {
-                    Directory.CreateDirectory(customLevelsPath);
+                    // Copy the file only if it’s different or has changed
+                    if (File.Exists(destinationPath))
+                    {
+                        // Optionally, compare file contents to avoid overwriting unchanged files
+                        string sourceContent = File.ReadAllText(sourcePath);
+                        string destContent = File.ReadAllText(destinationPath);
+                        if (sourceContent == destContent)
+                        {
+                            Debug.Log($"File {fileName} is identical, skipping copy.");
+                        }
+                        else
+                        {
+                            File.Copy(sourcePath, destinationPath, true);
+                            Debug.Log($"Custom level copied to: {destinationPath}");
+                        }
+                    }
+                    else
+                    {
+                        File.Copy(sourcePath, destinationPath, true);
+                        Debug.Log($"Custom level copied to: {destinationPath}");
+                    }
                 }
-
-                // Copy the file to persistent data path
-                File.Copy(sourcePath, destinationPath, true);
-                Debug.Log($"Custom level copied to: {destinationPath}");
+                else
+                {
+                    Debug.Log($"Selected file is already in CustomLevels: {destinationPath}");
+                }
 
                 // Load the level
                 string levelName = Path.GetFileNameWithoutExtension(fileName);
@@ -83,11 +109,15 @@ void LoadCustomLevel()
                 Debug.Log("Selected Level: " + levelName);
                 SceneManager.LoadScene("GameLevel");
             }
+            catch (IOException e)
+            {
+                Debug.LogError($"IOException: Failed to copy custom level file: {e.Message}");
+                // Optionally, notify the user via UI
+            }
             catch (System.Exception e)
             {
-                Debug.LogError($"Failed to copy custom level file: {e.Message}");
+                Debug.LogError($"Unexpected error: Failed to copy custom level file: {e.Message}");
             }
         }
     }
-
 }

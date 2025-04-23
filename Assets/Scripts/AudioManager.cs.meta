@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 0e3b69ef0ac69fa41b44b9c604ce3fd1
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - MoveBox: {fileID: 8300000, guid: a842a26f85de94544b384a415f82690a, type: 3}
+  - MovePlayer: {fileID: 8300000, guid: cfc5eb28ae5109342954cea1b339c3d6, type: 3}
+  - ButtonSound: {fileID: 8300000, guid: 1b69b16b60c6f2d4bb2c7a3db09ed57b, type: 3}
+  - ResetSound: {fileID: 8300000, guid: 91bcb0271c845474f8fec8f05886025d, type: 3}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

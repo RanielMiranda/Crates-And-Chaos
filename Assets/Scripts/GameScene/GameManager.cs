@@ -19,11 +19,6 @@ public class GameManager : MonoBehaviour
     private List<MetalBoxController> metalBoxes = new List<MetalBoxController>();
     private List<ElementalBoxController> magnetBoxes = new List<ElementalBoxController>();   
     private bool hasDestroy; 
-    
-
-    //Audios
-    public AudioClip MoveBox;
-    public AudioClip MovePlayer;
 
     private int totalGoalsCovered = 0;
     private GameObject[] pressurePlates;
@@ -136,6 +131,7 @@ public class GameManager : MonoBehaviour
     {
         if (undoStack.Count > 0)
         {   
+            AudioManager.Instance.PlayButtonSound();
             //push to redo
             metalBoxes.RemoveAll(box => box == null);
             GameState currentState = new GameState
@@ -199,6 +195,7 @@ public class GameManager : MonoBehaviour
     {
         if (redoStack.Count > 0)
         {
+            AudioManager.Instance.PlayButtonSound();
             metalBoxes.RemoveAll(box => box == null);
             GameState redoState = redoStack.Pop();
             undoStack.Push(redoState);
@@ -229,6 +226,7 @@ public class GameManager : MonoBehaviour
     {
         Debug.Log("Resetting");
         isWin = false;
+        AudioManager.Instance.PlayResetSound();
         StartCoroutine(ResetAfterLoad());
     }
 
@@ -275,20 +273,39 @@ public class GameManager : MonoBehaviour
         string levelName = SelectedLevelName;
         if (!string.IsNullOrEmpty(levelName))
         {
-            // Load the TextAsset from Resources
+            string json = null;
+            // Try loading from Resources/Levels
             TextAsset levelAsset = Resources.Load<TextAsset>("Levels/" + levelName);
-            if (levelAsset == null)
+            string customLevelPath = Path.Combine(Application.persistentDataPath, "CustomLevels", levelName + ".json");
+
+            if (levelAsset != null)
             {
-                Debug.LogError("Level not found in Resources/Levels: " + levelName);
+                json = levelAsset.text;
+                Debug.Log("Loading level from Resources: " + levelName);
+            }
+            else if (File.Exists(customLevelPath))
+            {
+                try
+                {
+                    json = File.ReadAllText(customLevelPath);
+                    Debug.Log("Loading level from persistent path: " + customLevelPath);
+                }
+                catch (System.Exception e)
+                {
+                    Debug.LogError($"Failed to read custom level file {customLevelPath}: {e.Message}");
+                    return;
+                }
+            }
+            else
+            {
+                Debug.LogError("Level not found in Resources/Levels or persistent path: " + levelName);
                 return;
             }
 
             try
             {
-                // Use the TextAsset's text content
-                string json = levelAsset.text;
+                // Deserialize JSON
                 level = JsonUtility.FromJson<LevelData>(json);
-
                 Debug.Log("Loaded JSON: " + json);
 
                 // Clear current scene objects
@@ -392,7 +409,7 @@ public class GameManager : MonoBehaviour
     public void NextHelpPage()
     {
         if (currentPageIndex == shortcutPages.Length - 1) return;
-
+        AudioManager.Instance.PlayButtonSound();
         currentPageIndex += 1;
         ShortcutInfoText.text = shortcutPages[currentPageIndex]; 
     }
@@ -400,7 +417,7 @@ public class GameManager : MonoBehaviour
     public void PrevHelpPage()
     {
         if (currentPageIndex == 0) return;
-
+        AudioManager.Instance.PlayButtonSound();
         currentPageIndex -= 1;
         ShortcutInfoText.text = shortcutPages[currentPageIndex]; 
     }
@@ -408,6 +425,7 @@ public class GameManager : MonoBehaviour
     public void ToggleHelp()
     {
         currentPageIndex = 0;
+        AudioManager.Instance.PlayButtonSound();
         if (helpUI.activeSelf)
         {
             helpUI.SetActive(false);
@@ -427,11 +445,13 @@ public class GameManager : MonoBehaviour
     public void toggleWinScreenUI() {
         if (!CheckWinCondition()) 
         {
+            AudioManager.Instance.PlayButtonSound();                        
             levelClearedText.text = "Pause Menu";
             menuCloseButton.SetActive(true);         
         }
         if (CheckWinCondition() && isWin) 
         {
+            AudioManager.Instance.PlayWinSound();
             levelClearedText.text = "Level Cleared!";
             menuCloseButton.SetActive(false);
         } 

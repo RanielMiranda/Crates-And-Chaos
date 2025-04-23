@@ -142,6 +142,7 @@ public class MetalBoxController : MonoBehaviour
     private IEnumerator MoveToPosition(Vector3 targetPosition)
     {
         isMoving = true;
+        AudioManager.Instance.PlayMoveBox();
         while (Vector3.Distance(transform.position, targetPosition) > 0.01f)
         {
             transform.position = Vector3.MoveTowards(transform.position, targetPosition, moveSpeed * Time.deltaTime);

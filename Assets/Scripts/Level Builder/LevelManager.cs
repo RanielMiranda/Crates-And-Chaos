@@ -61,6 +61,7 @@ public class LevelManager : MonoBehaviour
 
     public void SaveLevel()
     {
+        AudioManager.Instance.PlayButtonSound();
         Debug.Log("Saving level: " + levelNameInputField.text);
         LevelData level = new LevelData
         {
@@ -106,6 +107,7 @@ public class LevelManager : MonoBehaviour
 
     public void LoadLevel()
     {
+        AudioManager.Instance.PlayButtonSound();
         // Open the file dialog to let the user select a file
         string[] paths = StandaloneFileBrowser.OpenFilePanel("Select Level", "", "json", true);
         
@@ -185,6 +187,7 @@ public class LevelManager : MonoBehaviour
 
     public void ToggleHelp()
     {
+        AudioManager.Instance.PlayButtonSound();
         currentPageIndex = 0;
         if (helpUI.activeSelf)
         {
@@ -199,7 +202,7 @@ public class LevelManager : MonoBehaviour
     public void UpdateTextNextPage()
     {
         if (currentPageIndex == shortcutPages.Length - 1) return;
-
+        AudioManager.Instance.PlayButtonSound();
         currentPageIndex += 1;
         ShortcutInfoText.text = shortcutPages[currentPageIndex]; 
     }
@@ -207,14 +210,15 @@ public class LevelManager : MonoBehaviour
     public void UpdateTextPreviousPage()
     {
         if (currentPageIndex == 0) return;
-
+        AudioManager.Instance.PlayButtonSound();
         currentPageIndex -= 1;
         ShortcutInfoText.text = shortcutPages[currentPageIndex]; 
     }
 
     public void ToggleSave()
     {
-    if (savedUI.activeSelf)
+        AudioManager.Instance.PlayButtonSound();        
+        if (savedUI.activeSelf)
         {
             savedUI.SetActive(false);
         }

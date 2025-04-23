@@ -37,7 +37,7 @@ public class ElementalBoxController : MonoBehaviour
         // No collision
         if (!Physics.Raycast(transform.position, direction, out RaycastHit hit, direction.magnitude, blockingLayer))
         {
-            AudioManager.MoveBox();       
+            AudioManager.Instance.PlayMoveBox();       
             StartCoroutine(MoveToPosition(targetPosition, moveSpeed));
             return true;
         }
@@ -148,7 +148,8 @@ public class ElementalBoxController : MonoBehaviour
                 newMagnetBox.GetComponent<ElementalBoxController>().enabled = true;
 
                 DestroyReaction(otherbox.gameObject);    
-                GameManager.Instance.CacheMetalAndMagnetBoxes();                            
+                GameManager.Instance.CacheMetalAndMagnetBoxes();    
+                AudioManager.Instance.PlayMagnetSound();                        
                 break;
 
             case ElementalReactions.None:

@@ -179,7 +179,7 @@ public class PlayerController : MonoBehaviour
     private IEnumerator MoveToPosition(Vector3 target)
     {
         isMoving = true;
-        AudioManager.MovePlayer();
+        AudioManager.Instance.PlayMovePlayer();
         animator.SetBool("isMoving", true); // Set animation for movement
 
         while (Vector3.Distance(transform.position, target) > 0.01f)

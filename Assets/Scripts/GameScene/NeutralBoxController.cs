@@ -38,7 +38,7 @@ public class NeutralBoxController : MonoBehaviour
     private IEnumerator MoveToPosition(Vector3 target, float moveSpeed)
     {
         isMoving = true;
-        AudioManager.MoveBox();
+        AudioManager.Instance.PlayMoveBox();
         
         while (Vector3.Distance(transform.position, target) >0.01f)
         {
