@@ -119,12 +119,19 @@ public class ElementalBoxController : MonoBehaviour
                         if (Physics.Raycast(otherBox.transform.position, direction, out RaycastHit nextHit, 1f, blockingLayer))
                         {
                             var nextBox = nextHit.collider.GetComponent<ElementalBoxController>();
-                            if (nextBox != null)
+                            if (nextBox == null)
                             {
-                                nextBox.TryToPushBox(direction *2f, moveSpeed); // Transfer energy to next box
+                                var neutralBox = GetOtherNeutralBox(nextHit);
+                                if (neutralBox != null)
+                                {
+                                    neutralBox.TryToPushBox(direction * 2f, moveSpeed);
+                                }
+                            }
+                            else if (nextBox != null)
+                            {
+                                nextBox.TryToPushBox(direction * 2f, moveSpeed); // Transfer energy to next box                                
                             }
                         }
-
                         // Move the box normally
                         otherBox.TryToPushBox(direction, moveSpeed);
                     }
@@ -212,6 +219,11 @@ public class ElementalBoxController : MonoBehaviour
     public ElementalBoxController GetOtherBox(RaycastHit hit)
     {
     return hit.collider.GetComponent<ElementalBoxController>();
+    }
+
+    public NeutralBoxController GetOtherNeutralBox(RaycastHit hit)
+    {
+    return hit.collider.GetComponent<NeutralBoxController>();
     }
 
     private void DestroyReaction(GameObject box)

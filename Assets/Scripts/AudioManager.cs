@@ -5,13 +5,18 @@ public class AudioManager : MonoBehaviour
     public static AudioManager Instance;
 
     public AudioClip MoveBox;
-    public AudioClip MovePlayer;
+    public AudioClip MovePlayerOne;
+    public AudioClip MovePlayerTwo;
+    public AudioClip MovePlayerThree;
+    public AudioClip MovePlayerFour;
     public AudioClip ButtonSound;
     public AudioClip ResetSound;
     public AudioClip MagnetSound;
-    public AudioClip WinSound;
+    public AudioClip WinSound; 
 
     private AudioSource audioSource; // Persistent AudioSource
+
+    private int AlternatePlayerStep = 0;
 
     private void Awake()
     {
@@ -45,7 +50,22 @@ public class AudioManager : MonoBehaviour
 
     public void PlayMovePlayer()
     {
-        PlaySound(MovePlayer);
+        if(AlternatePlayerStep == 0) {
+            PlaySound(MovePlayerOne);
+            AlternatePlayerStep++;
+        }
+        else if (AlternatePlayerStep == 1) {
+            PlaySound(MovePlayerTwo);
+            AlternatePlayerStep++;
+        }
+        else if (AlternatePlayerStep == 2) {
+            PlaySound(MovePlayerThree);
+            AlternatePlayerStep++;
+        }
+        else if (AlternatePlayerStep == 3) {
+            PlaySound(MovePlayerFour);
+            AlternatePlayerStep = 0;
+        }
     }
 
     public void PlayButtonSound()
