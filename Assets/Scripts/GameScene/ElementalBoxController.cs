@@ -155,8 +155,7 @@ public class ElementalBoxController : MonoBehaviour
                 GameObject newMagnetBox = Instantiate(GameManager.Instance.magnetBoxPrefab, otherbox.transform.position, Quaternion.identity);
                 newMagnetBox.GetComponent<ElementalBoxController>().enabled = true;
 
-                DestroyReaction(otherbox.gameObject);    
-                GameManager.Instance.CacheMetalAndMagnetBoxes();    
+                DestroyReaction(otherbox.gameObject);                  
                 AudioManager.Instance.PlayMagnetSound();                        
                 break;
 
