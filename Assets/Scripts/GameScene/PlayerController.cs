@@ -200,16 +200,22 @@ public class PlayerController : MonoBehaviour
         transform.position = target;
 
         // Player has finished their move, now update game state and trigger box movements
-        GameManager.Instance.SaveState();
-        GameManager.Instance.UpdateMetalBoxes();
-        GameManager.Instance.CacheMetalAndMagnetBoxes();
-
-        ResetMovePosition();
 
         if (isWin) // Check if win condition was set when moving to Goal
         {
-            GameManager.Instance.toggleWinScreenUI();
+            GameManager.Instance.toggleWinScreenUI();
         }
+        else {
+
+        
+        GameManager.Instance.SaveState();
+        GameManager.Instance.UpdateMetalBoxes();
+        GameManager.Instance.CacheMetalAndMagnetBoxes();
+        }
+        
+        ResetMovePosition();
+
+
     }
 
     private void ResetMovePosition()
